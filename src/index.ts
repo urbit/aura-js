@@ -2,30 +2,32 @@ import bigInt, { BigInteger } from 'big-integer';
 
 interface Dat {
   pos: boolean;
-  year: number;
-  month: number;
+  year: BigInteger;
+  month: BigInteger;
   time: Tarp;
 }
 
 interface Tarp {
-  day: number;
-  hour: number;
-  minute: number;
-  second: number;
+  day: BigInteger;
+  hour: BigInteger;
+  minute: BigInteger;
+  second: BigInteger;
   ms: BigInteger[];
 }
 
-const EPOCH = bigInt('292.277.024.400'.replace('.', ''));
+const EPOCH = bigInt('292277024400');
 const zero = bigInt.zero;
 
-function isLeapYear(year: BigInteger) {
-  return year.mod(4) === zero && (year.mod(100).neq(0) || year.mod(400).eq(0));
+export function isLeapYear(year: BigInteger) {
+  return year.mod(4).eq(zero) && (year.mod(100).neq(0) || year.mod(400).eq(0));
 }
 const MOH_YO = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 const MOY_YO = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 const DAY_YO = bigInt(86400);
 const HOR_YO = bigInt(3600);
 const MIT_YO = bigInt(60);
+const ERA_YO = bigInt(146097);
+const CET_YO = bigInt(36524);
 
 export function year(det: Dat) {
   const yer = det.pos
@@ -33,33 +35,35 @@ export function year(det: Dat) {
     : EPOCH.subtract(bigInt(det.year).prev());
   const day = (() => {
     let cah = isLeapYear(yer) ? MOY_YO : MOH_YO;
-    let d = bigInt(det.time.day);
-    let m = det.month;
-    while (m != 0) {
+    let d = det.time.day.prev();
+    let m = det.month.prev();
+    while (m.neq(0)) {
       const [first, ...rest] = cah;
-      d.add(bigInt(first));
-      m -= 1;
+      d = d.add(bigInt(first));
+      m = m.prev();
       cah = rest;
     }
     let loop: boolean = true;
     let y = yer;
     while (loop == true) {
-      if (yer.mod(4).neq(zero)) {
-        y = y.prev();
+      if (y.mod(4).neq(zero)) {
+        y = y.minus(1);
         d = d.add(isLeapYear(y) ? 366 : 365);
-      } else if (yer.mod(100).neq(zero)) {
+      } else if (y.mod(100).neq(zero)) {
         y = y.minus(bigInt(4));
         d = d.add(isLeapYear(y) ? 1461 : 1460);
-      } else if (yer.mod(400).neq(zero)) {
-        y = y.minus(bigInt(400));
+      } else if (y.mod(400).neq(zero)) {
+        y = y.minus(bigInt(100));
         d = d.add(isLeapYear(y) ? 36525 : 36524);
       } else {
-        let foo = bigInt(4)
-          .multiply(36524)
-          .next();
-        let newD = yer.divide(bigInt(400));
-        let bar = newD.multiply(foo);
-        d = d.add(bar);
+        let eras = y.divide(bigInt(400));
+        d = d.add(
+          eras.multiply(
+            bigInt(4)
+              .multiply(bigInt(36524))
+              .next()
+          )
+        );
         loop = false;
       }
     }
@@ -69,14 +73,14 @@ export function year(det: Dat) {
   let sec = bigInt(det.time.second)
     .add(DAY_YO.multiply(day))
     .add(HOR_YO.multiply(bigInt(det.time.hour)))
-    .add(MIT_YO.multiply(bigInt(det.time.hour)));
+    .add(MIT_YO.multiply(bigInt(det.time.minute)));
 
   let ms = det.time.ms;
   let fac = bigInt.zero;
-  let muc = 4;
-  while(ms.length !== 0) {
+  let muc = 3;
+  while (ms.length !== 0) {
     const [first, ...rest] = ms;
-    fac = fac.add(first.shiftLeft(bigInt(16*muc)))
+    fac = fac.add(first.shiftLeft(bigInt(16 * muc)));
     ms = rest;
     muc -= 1;
   }
@@ -85,173 +89,99 @@ export function year(det: Dat) {
 }
 
 export function parseDa(x: string): BigInteger {
-  console.log(x);
-  return bigInt.zero;
+  const [date, time, ms] = x.split('..');
+  const [yer, month, day] = date.slice(1).split('.');
+  const [hour, minute, sec] = time.split('.');
+  const millis = bigInt(ms, bigInt(16));
+  return year({
+    pos: true,
+    year: bigInt(yer, 10),
+    month: bigInt(month, 10),
+    time: {
+      day: bigInt(day, 10),
+      hour: bigInt(hour, 10),
+      minute: bigInt(minute, 10),
+      second: bigInt(sec, 10),
+      ms: [millis],
+    },
+  });
 }
 
-class Atom {
-  constructor(private value: BigInteger) {
-    this.value = value;
-  }
+function yell(x: BigInteger): Tarp {
+  let sec = x.shiftRight(64);
+  let day = sec.divide(DAY_YO);
+  sec = sec.mod(DAY_YO);
+  let hor = sec.divide(HOR_YO);
+  sec = sec.mod(HOR_YO);
+  let mit = sec.divide(MIT_YO);
+  sec = sec.mod(MIT_YO);
 
-  abs(): BigInteger {
-    return this.value.abs();
-  }
-
-  add(x: BigInteger) {
-    return this.value.add(x);
-  }
-
-  and(x: BigInteger) {
-    return this.value.and(x);
-  }
-
-  bitLength() {
-    return this.value.bitLength();
-  }
-
-  compare(x: BigInteger) {
-    return this.value.compare(x);
-  }
-
-  compareAbs(x: BigInteger) {
-    return this.value.compareAbs(x);
-  }
-
-  compareTo(x: BigInteger) {
-    return this.value.compareTo(x);
-  }
-
-  divide(x: BigInteger) {
-    return this.value.divide(x);
-  }
-
-  divmod(x: BigInteger) {
-    return this.value.divmod(x);
-  }
-
-  eq = this.equals;
-
-  equals(x: BigInteger) {
-    return this.value.equals(x);
-  }
-
-  geq = this.greaterOrEquals;
-
-  greater(x: BigInteger) {
-    return this.value.greater(x);
-  }
-
-  greaterOrEquals(x: BigInteger) {
-    return this.value.greaterOrEquals(x);
-  }
-
-  gt = this.greater;
-
-  isDivisibleBy(x: BigInteger) {
-    return this.value.isDivisibleBy(x);
-  }
-
-  isEven() {
-    return this.value.isEven();
-  }
-
-  isNegative() {
-    return this.value.isNegative();
-  }
-
-  isOdd() {
-    return this.value.isOdd();
-  }
-
-  isPositive() {
-    return this.value.isPositive();
-  }
-
-  isProbablePrime() {
-    return this.value.isProbablePrime();
-  }
-
-  isPrime() {
-    return this.value.isPrime();
-  }
-
-  isUnit() {
-    return this.value.isUnit();
-  }
-
-  isZero() {
-    return this.value.isZero();
-  }
-
-  leq = this.lesserOrEquals;
-
-  lesser(x: BigInteger) {
-    return this.value.lesser(x);
-  }
-
-  lesserOrEquals(x: BigInteger) {
-    return this.value.lesserOrEquals(x);
-  }
-
-  lt = this.lesser;
-
-  minus(x: BigInteger) {
-    return this.value.minus(x);
-  }
-
-  mod(x: BigInteger) {
-    return this.value.mod(x);
-  }
-
-  modInv(x: BigInteger) {
-    return this.value.modInv(x);
-  }
-
-  modPow(exp: BigInteger, mod: BigInteger) {
-    return this.value.modPow(exp, mod);
-  }
-
-  multiply(x: BigInteger) {
-    return this.value.multiply(x);
-  }
-
-  negate() {
-    return this.value.negate();
-  }
-
-  neq = this.notEquals;
-
-  notEquals(x: BigInteger) {
-    return this.value.notEquals(x);
-  }
-
-  next() {
-    return this.value.next();
-  }
-
-  not() {
-    return this.value.not();
-  }
-
-  or(x: BigInteger) {
-    return this.value.or(x);
-  }
-
-  over = this.divide;
-
-  plus = this.add;
-
-  pow(x: BigInteger) {
-    return this.value.pow(x);
-  }
-
-  prev() {
-    return this.value.prev();
-  }
-
-  remainder = this.mod;
-
+  return {
+    ms: [],
+    day,
+    minute: mit,
+    hour: hor,
+    second: sec,
+  };
 }
 
-export default Atom;
+function yall(day: BigInteger): [BigInteger, BigInteger, BigInteger] {
+  let era = zero;
+  let cet = zero;
+  let lep = false;
+  era = day.divide(ERA_YO);
+  day = day.mod(ERA_YO);
+  if (day.lt(CET_YO.next())) {
+    lep = true;
+  } else {
+    lep = false;
+    cet = bigInt(1);
+    day = day.minus(CET_YO.next());
+    cet = cet.add(day.divide(CET_YO));
+    day = day.mod(CET_YO);
+  }
+  let yer = era.multiply(400).add(cet.multiply(100));
+  let loop = true;
+  while (loop == true) {
+    let dis = lep ? 366 : 365;
+    if (!day.lt(dis)) {
+      yer = yer.next();
+      day = day.minus(dis);
+      lep = yer.mod(4).eq(0);
+    } else {
+      loop = false;
+      let inner = true;
+      let mot = zero;
+      while (inner) {
+        let cah = lep ? MOY_YO : MOH_YO;
+        let zis = cah[mot.toJSNumber()];
+        if (day.lt(zis)) {
+          return [yer, mot.next(), day.next()];
+        }
+        mot = mot.next();
+        day = day.minus(zis);
+      }
+    }
+  }
+  return [zero, zero, zero];
+}
+
+function yore(x: BigInteger): Dat {
+  const time = yell(x);
+  const [y, month, d] = yall(time.day);
+  time.day = d;
+  const pos = y.gt(EPOCH);
+  const year = pos ? y.minus(EPOCH) : EPOCH.minus(y).next();
+
+  return {
+    pos,
+    year,
+    month,
+    time,
+  };
+}
+export function formatDa(x: BigInteger) {
+  const { year, month, time } = yore(x);
+
+  return `~${year}.${month}.${time.day}..${time.hour}.${time.minute}.${time.second}..b4cb`;
+}

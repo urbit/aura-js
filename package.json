@@ -19,6 +19,9 @@
     "size": "size-limit",
     "analyze": "size-limit --why"
   },
+  "jest": {
+    "verbose": true
+  },
   "peerDependencies": {},
   "husky": {
     "hooks": {
@@ -31,7 +34,7 @@
     "singleQuote": true,
     "trailingComma": "es5"
   },
-  "name": "aura",
+  "name": "@urbit/aura",
   "author": "Liam Fitzgerald",
   "module": "dist/aura.esm.js",
   "size-limit": [
