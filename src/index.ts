@@ -93,6 +93,7 @@ export function parseDa(x: string): BigInteger {
   const [yer, month, day] = date.slice(1).split('.');
   const [hour, minute, sec] = time.split('.');
   const millis = bigInt(ms, bigInt(16));
+
   return year({
     pos: true,
     year: bigInt(yer, 10),
@@ -109,6 +110,13 @@ export function parseDa(x: string): BigInteger {
 
 function yell(x: BigInteger): Tarp {
   let sec = x.shiftRight(64);
+  const milliMask = bigInt('ffffffffffffffff', 16);
+  const millis = milliMask.and(x);
+  const ms = millis
+    .toString(16)
+    .match(/.{1,4}/g)!
+    .filter(x => x !== '0000')
+    .map(x => bigInt(x, 16));
   let day = sec.divide(DAY_YO);
   sec = sec.mod(DAY_YO);
   let hor = sec.divide(HOR_YO);
@@ -117,7 +125,7 @@ function yell(x: BigInteger): Tarp {
   sec = sec.mod(MIT_YO);
 
   return {
-    ms: [],
+    ms,
     day,
     minute: mit,
     hour: hor,
@@ -183,5 +191,7 @@ function yore(x: BigInteger): Dat {
 export function formatDa(x: BigInteger) {
   const { year, month, time } = yore(x);
 
-  return `~${year}.${month}.${time.day}..${time.hour}.${time.minute}.${time.second}..b4cb`;
+  return `~${year}.${month}.${time.day}..${time.hour}.${time.minute}.${
+    time.second
+  }..${time.ms.map(x => x.toString(16)).join('.')}`;
 }
