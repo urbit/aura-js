@@ -92,7 +92,7 @@ export function parseDa(x: string): BigInteger {
   const [date, time, ms] = x.split('..');
   const [yer, month, day] = date.slice(1).split('.');
   const [hour, minute, sec] = time.split('.');
-  const millis = bigInt(ms, bigInt(16));
+  const millis = ms.split('.').map(m => bigInt(m, 16));
 
   return year({
     pos: true,
@@ -103,7 +103,7 @@ export function parseDa(x: string): BigInteger {
       hour: bigInt(hour, 10),
       minute: bigInt(minute, 10),
       second: bigInt(sec, 10),
-      ms: [millis],
+      ms: millis,
     },
   });
 }
@@ -193,5 +193,5 @@ export function formatDa(x: BigInteger) {
 
   return `~${year}.${month}.${time.day}..${time.hour}.${time.minute}.${
     time.second
-  }..${time.ms.map(x => x.toString(16)).join('.')}`;
+  }..${time.ms.map(x => x.toString(16).padStart(4, '0')).join('.')}`;
 }
