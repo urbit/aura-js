@@ -18,7 +18,7 @@ interface Tarp {
 const EPOCH = bigInt('292277024400');
 const zero = bigInt.zero;
 
-export function isLeapYear(year: BigInteger) {
+function isLeapYear(year: BigInteger) {
   return year.mod(4).eq(zero) && (year.mod(100).neq(0) || year.mod(400).eq(0));
 }
 const MOH_YO = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
@@ -194,4 +194,38 @@ export function formatDa(x: BigInteger) {
   return `~${year}.${month}.${time.day}..${time.hour}.${time.minute}.${
     time.second
   }..${time.ms.map(x => x.toString(16).padStart(4, '0')).join('.')}`;
+}
+
+function chunkFromRight(str: string, size: number) {
+  const numChunks = Math.ceil(str.length / size);
+  console.log(numChunks);
+  const chunks = new Array(numChunks);
+
+  for (
+    let i = numChunks - 1, o = str.length;
+    i >= 0;
+    --i, o -= size
+  ) {
+    let start = o - size;
+    let len = size;
+    if(start < 0) {
+      start = 0;
+      len = o;
+    }
+    chunks[i] = str.substr(start, len);
+  }
+
+  return chunks;
+}
+const uwMask = bigInt(63);
+const uwAlphabet =
+  '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-~';
+export function formatUw(x: BigInteger) {
+  let res = '';
+  while (x.neq(bigInt.zero)) {
+    let nextSix = x.and(uwMask).toJSNumber();
+    res = uwAlphabet[nextSix] + res;
+    x = x.shiftRight(6);
+  }
+  return `0w${chunkFromRight(res, 5).join('.')}`;
 }
