@@ -198,7 +198,6 @@ export function formatDa(x: BigInteger) {
 
 function chunkFromRight(str: string, size: number) {
   const numChunks = Math.ceil(str.length / size);
-  console.log(numChunks);
   const chunks = new Array(numChunks);
 
   for (
