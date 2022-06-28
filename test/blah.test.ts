@@ -1,4 +1,4 @@
-import { formatDa, formatUw, parseDa } from '../src';
+import { formatDa, formatUv, formatUw, parseDa } from '../src';
 import bigInt, { BigInteger } from 'big-integer';
 
 const DA_PAIRS: [string, BigInteger][] = [
@@ -41,5 +41,23 @@ describe('@uw', () => {
     let res =
       '0w2.VNFPq.zLWXr.mHG98.cOSaU.jD-HK.WOAEW.icKX-.-UOti.RrLxM.BEdKI.U8j~T.rgqLe.HuVVm.m5aDi.FcUj0.z-9H9.PWYVS';
     expect(formatUw(num)).toBe(res);
+  });
+});
+
+describe('@uv', () => {
+  it('formats', () => {
+    let num = bigInt(1234);
+    let res = '0v16i';
+    expect(formatUv(num)).toBe(res);
+  });
+  it('formats two', () => {
+    let num = bigInt(
+      '4.715.838.753.694.475.992.579.249.794.985.609.354.876.653.107.513.376.869.107.585.916.141.874.120.351.297.535.898.666.953.377.988.719.385.257.642.282.348.313.095.587.079.274.499.396.365.843.215.360.500.554'
+        .split('.')
+        .join('')
+    );
+    let res =
+      '0v1d0.l2h7n.mo1ro.s3r8e.4f6gd.dfsp1.hc5en.a0k8j.1v7vk.16jqd.oog39.5ool7.mrkdp.vvofi.gd2d6.vnmi9.a1dlt.7lbbm.iq76k.u5ivc.pp8qa'
+    expect(formatUv(num)).toBe(res);
   });
 });
