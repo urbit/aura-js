@@ -216,6 +216,19 @@ function chunkFromRight(str: string, size: number) {
 
   return chunks;
 }
+const uvMask = bigInt(31);
+const uvAlphabet =
+  '0123456789abcdefghijklmnopqrstuv';
+export function formatUv(x: BigInteger) {
+  let res = '';
+  while (x.neq(bigInt.zero)) {
+    let nextSix = x.and(uvMask).toJSNumber();
+    res = uvAlphabet[nextSix] + res;
+    x = x.shiftRight(5);
+  }
+  return `0v${chunkFromRight(res, 5).join('.')}`;
+}
+
 const uwMask = bigInt(63);
 const uwAlphabet =
   '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-~';
