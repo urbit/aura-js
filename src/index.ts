@@ -219,6 +219,19 @@ function chunkFromRight(str: string, size: number) {
 const uvMask = bigInt(31);
 const uvAlphabet =
   '0123456789abcdefghijklmnopqrstuv';
+
+export function parseUv(x: string) {
+  let res = bigInt(0);
+  x = x.slice(2);
+  while (x !== '') {
+    if (x[0] !== '.') {
+      res = res.shiftLeft(5).add(uvAlphabet.indexOf(x[0]));
+    }
+    x = x.slice(1);
+  }
+  return res;
+}
+
 export function formatUv(x: BigInteger) {
   let res = '';
   while (x.neq(bigInt.zero)) {
@@ -232,6 +245,19 @@ export function formatUv(x: BigInteger) {
 const uwMask = bigInt(63);
 const uwAlphabet =
   '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-~';
+
+export function parseUw(x: string) {
+  let res = bigInt(0);
+  x = x.slice(2);
+  while (x !== '') {
+    if (x[0] !== '.') {
+      res = res.shiftLeft(6).add(uwAlphabet.indexOf(x[0]));
+    }
+    x = x.slice(1);
+  }
+  return res;
+}
+
 export function formatUw(x: BigInteger) {
   let res = '';
   while (x.neq(bigInt.zero)) {
