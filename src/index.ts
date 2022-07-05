@@ -188,7 +188,10 @@ function yore(x: BigInteger): Dat {
     time,
   };
 }
-export function formatDa(x: BigInteger) {
+export function formatDa(x: BigInteger | string) {
+  if (typeof x === 'string') {
+    x = bigInt(x);
+  }
   const { year, month, time } = yore(x);
 
   return `~${year}.${month}.${time.day}..${time.hour}.${time.minute}.${
@@ -232,7 +235,10 @@ export function parseUv(x: string) {
   return res;
 }
 
-export function formatUv(x: BigInteger) {
+export function formatUv(x: BigInteger | string) {
+  if (typeof x === 'string') {
+    x = bigInt(x);
+  }
   let res = '';
   while (x.neq(bigInt.zero)) {
     let nextSix = x.and(uvMask).toJSNumber();
@@ -258,7 +264,10 @@ export function parseUw(x: string) {
   return res;
 }
 
-export function formatUw(x: BigInteger) {
+export function formatUw(x: BigInteger | string) {
+  if (typeof x === 'string') {
+    x = bigInt(x);
+  }
   let res = '';
   while (x.neq(bigInt.zero)) {
     let nextSix = x.and(uwMask).toJSNumber();
