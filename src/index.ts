@@ -188,7 +188,10 @@ function yore(x: BigInteger): Dat {
     time,
   };
 }
-export function formatDa(x: BigInteger) {
+export function formatDa(x: BigInteger | string) {
+  if (typeof x === 'string') {
+    x = bigInt(x);
+  }
   const { year, month, time } = yore(x);
 
   return `~${year}.${month}.${time.day}..${time.hour}.${time.minute}.${
@@ -219,7 +222,23 @@ function chunkFromRight(str: string, size: number) {
 const uvMask = bigInt(31);
 const uvAlphabet =
   '0123456789abcdefghijklmnopqrstuv';
-export function formatUv(x: BigInteger) {
+
+export function parseUv(x: string) {
+  let res = bigInt(0);
+  x = x.slice(2);
+  while (x !== '') {
+    if (x[0] !== '.') {
+      res = res.shiftLeft(5).add(uvAlphabet.indexOf(x[0]));
+    }
+    x = x.slice(1);
+  }
+  return res;
+}
+
+export function formatUv(x: BigInteger | string) {
+  if (typeof x === 'string') {
+    x = bigInt(x);
+  }
   let res = '';
   while (x.neq(bigInt.zero)) {
     let nextSix = x.and(uvMask).toJSNumber();
@@ -232,7 +251,23 @@ export function formatUv(x: BigInteger) {
 const uwMask = bigInt(63);
 const uwAlphabet =
   '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-~';
-export function formatUw(x: BigInteger) {
+
+export function parseUw(x: string) {
+  let res = bigInt(0);
+  x = x.slice(2);
+  while (x !== '') {
+    if (x[0] !== '.') {
+      res = res.shiftLeft(6).add(uwAlphabet.indexOf(x[0]));
+    }
+    x = x.slice(1);
+  }
+  return res;
+}
+
+export function formatUw(x: BigInteger | string) {
+  if (typeof x === 'string') {
+    x = bigInt(x);
+  }
   let res = '';
   while (x.neq(bigInt.zero)) {
     let nextSix = x.and(uwMask).toJSNumber();
