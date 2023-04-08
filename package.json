@@ -1,14 +1,17 @@
 {
   "version": "0.6.0",
   "license": "MIT",
+  "name": "@urbit/aura",
+  "author": "Liam Fitzgerald",
+  "module": "dist/aura.esm.js",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "files": [
-    "dist",
-    "src"
+    "dist"
   ],
   "engines": {
-    "node": ">=10"
+    "node": ">=16",
+    "npm": ">=8"
   },
   "repository": {
     "type": "git",
@@ -23,10 +26,21 @@
     "size": "size-limit",
     "analyze": "size-limit --why"
   },
+  "dependencies": {},
+  "peerDependencies": {
+    "big-integer": "^1.6.51"
+  },
+  "devDependencies": {
+    "@size-limit/preset-small-lib": "^7.0.8",
+    "husky": "^7.0.4",
+    "size-limit": "^7.0.8",
+    "tsdx": "^0.14.1",
+    "tslib": "^2.4.0",
+    "typescript": "^4.6.4"
+  },
   "jest": {
     "verbose": true
   },
-  "peerDependencies": {},
   "husky": {
     "hooks": {
       "pre-commit": "tsdx lint"
@@ -38,9 +52,6 @@
     "singleQuote": true,
     "trailingComma": "es5"
   },
-  "name": "@urbit/aura",
-  "author": "Liam Fitzgerald",
-  "module": "dist/aura.esm.js",
   "size-limit": [
     {
       "path": "dist/aura.cjs.production.min.js",
@@ -50,16 +61,5 @@
       "path": "dist/aura.esm.js",
       "limit": "10 KB"
     }
-  ],
-  "devDependencies": {
-    "@size-limit/preset-small-lib": "^7.0.8",
-    "husky": "^7.0.4",
-    "size-limit": "^7.0.8",
-    "tsdx": "^0.14.1",
-    "tslib": "^2.4.0",
-    "typescript": "^4.6.4"
-  },
-  "dependencies": {
-    "big-integer": "^1.6.51"
-  }
+  ]
 }
