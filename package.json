@@ -1,46 +1,58 @@
 {
   "version": "0.6.0",
   "license": "MIT",
+  "name": "@urbit/aura",
+  "author": "Liam Fitzgerald",
+  "module": "dist/aura.esm.js",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "files": [
-    "dist",
-    "src"
+    "dist"
   ],
   "engines": {
-    "node": ">=10"
+    "node": ">=16",
+    "npm": ">=8"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/urbit/aura-js"
   },
   "scripts": {
-    "start": "tsdx watch",
-    "build": "tsdx build",
-    "test": "tsdx test",
-    "lint": "tsdx lint",
-    "prepare": "tsdx build",
+    "start": "dts watch",
+    "build": "dts build",
+    "test": "dts test",
+    "lint": "dts lint",
+    "prepare": "dts build",
     "size": "size-limit",
     "analyze": "size-limit --why"
+  },
+  "peerDependencies": {
+    "big-integer": "^1.6.51"
+  },
+  "devDependencies": {
+    "@size-limit/preset-small-lib": "^8.2.4",
+    "@tsconfig/recommended": "^1.0.2",
+    "dts-cli": "^2.0.0",
+    "husky": "^7.0.4",
+    "jsverify": "^0.8.4",
+    "tslib": "^2.5.0",
+    "typescript": "^5.0.4"
   },
   "jest": {
     "verbose": true
   },
-  "peerDependencies": {},
   "husky": {
     "hooks": {
-      "pre-commit": "tsdx lint"
+      "pre-commit": "dts lint"
     }
   },
   "prettier": {
     "printWidth": 80,
     "semi": true,
     "singleQuote": true,
-    "trailingComma": "es5"
+    "trailingComma": "es5",
+    "endOfLine": "auto"
   },
-  "name": "@urbit/aura",
-  "author": "Liam Fitzgerald",
-  "module": "dist/aura.esm.js",
   "size-limit": [
     {
       "path": "dist/aura.cjs.production.min.js",
@@ -50,16 +62,5 @@
       "path": "dist/aura.esm.js",
       "limit": "10 KB"
     }
-  ],
-  "devDependencies": {
-    "@size-limit/preset-small-lib": "^7.0.8",
-    "husky": "^7.0.4",
-    "size-limit": "^7.0.8",
-    "tsdx": "^0.14.1",
-    "tslib": "^2.4.0",
-    "typescript": "^4.6.4"
-  },
-  "dependencies": {
-    "big-integer": "^1.6.51"
-  }
+  ]
 }
