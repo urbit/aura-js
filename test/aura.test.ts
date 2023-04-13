@@ -9,6 +9,8 @@ import {
   formatUd,
   parseUx,
   formatUx,
+  encodeTa,
+  decodeTa,
 } from '../src';
 import bigInt, { BigInteger } from 'big-integer';
 
@@ -34,6 +36,113 @@ describe('@da', () => {
         const res = formatDa(integer);
         expect(res).toEqual(da);
       });
+    });
+  });
+});
+
+const strings = {
+  symbols: {
+    str: '#fine()',
+    ta: '~.~23.fine~28.~29.',
+  },
+  spaces: {
+    str: 'fine here',
+    ta: '~.fine.here',
+  },
+  periods: {
+    str: 'fine.',
+    ta: '~.fine~.',
+  },
+  sigs: {
+    str: '~fine',
+    ta: '~.~~fine',
+  },
+  uppercase: {
+    str: 'Fine',
+    ta: '~.~46.ine',
+  },
+  normal: {
+    str: 'fine-123',
+    ta: '~.fine-123',
+  },
+  tricky: {
+    str: '~. F .~Yes',
+    ta: '~.~~~..~46..~.~~~59.es',
+  },
+};
+
+describe('@ta', () => {
+  describe('encodeTa', () => {
+    it('encodes symbols', () => {
+      const res = encodeTa(strings.symbols.str);
+      expect(res).toEqual(strings.symbols.ta);
+    });
+
+    it('encodes spaces', () => {
+      const res = encodeTa(strings.spaces.str);
+      expect(res).toEqual(strings.spaces.ta);
+    });
+
+    it('encodes sigs', () => {
+      const res = encodeTa(strings.sigs.str);
+      expect(res).toEqual(strings.sigs.ta);
+    });
+
+    it('encodes periods', () => {
+      const res = encodeTa(strings.periods.str);
+      expect(res).toEqual(strings.periods.ta);
+    });
+
+    it('encodes uppercase characters', () => {
+      const res = encodeTa(strings.uppercase.str);
+      expect(res).toEqual(strings.uppercase.ta);
+    });
+
+    it("doesn't encode digits, lowercase, or dashes", () => {
+      const res = encodeTa(strings.normal.str);
+      expect(res).toEqual(strings.normal.ta);
+    });
+
+    it('works as expected', () => {
+      const res = encodeTa(strings.tricky.str);
+      expect(res).toEqual(strings.tricky.ta);
+    });
+  });
+
+  describe('decodeTa', () => {
+    it('decodes symbols', () => {
+      const res = decodeTa(strings.symbols.ta);
+      expect(res).toEqual(strings.symbols.str);
+    });
+
+    it('decodes spaces', () => {
+      const res = decodeTa(strings.spaces.ta);
+      expect(res).toEqual(strings.spaces.str);
+    });
+
+    it('decodes sigs', () => {
+      const res = decodeTa(strings.sigs.ta);
+      expect(res).toEqual(strings.sigs.str);
+    });
+
+    it('decodes periods', () => {
+      const res = decodeTa(strings.periods.ta);
+      expect(res).toEqual(strings.periods.str);
+    });
+
+    it('decodes uppercase characters', () => {
+      const res = decodeTa(strings.uppercase.ta);
+      expect(res).toEqual(strings.uppercase.str);
+    });
+
+    it("doesn't decode digits, lowercase, or dashes", () => {
+      const res = decodeTa(strings.normal.ta);
+      expect(res).toEqual(strings.normal.str);
+    });
+
+    it('works as expected', () => {
+      const res = decodeTa(strings.tricky.ta);
+      expect(res).toEqual(strings.tricky.str);
     });
   });
 });
