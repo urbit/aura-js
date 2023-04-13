@@ -152,14 +152,8 @@ const fen: typeof fe = (r, a, b, f, m) => {
       //
       const tmp =
         j % 2 !== 0
-          ? arr
-              .add(a)
-              .subtract(eff.mod(a))
-              .mod(a)
-          : arr
-              .add(b)
-              .subtract(eff.mod(b))
-              .mod(b);
+          ? arr.add(a).subtract(eff.mod(a)).mod(a)
+          : arr.add(b).subtract(eff.mod(b)).mod(b);
 
       return loop(j - 1, tmp, ell);
     }

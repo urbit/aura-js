@@ -17,10 +17,10 @@ export function parseUx(ux: string) {
  * @return  {string}           the number as hex
  */
 export const formatUx = (hex: string): string => {
-  const nonZeroChars = dropWhile(hex.split(''), y => y === '0');
+  const nonZeroChars = dropWhile(hex.split(''), (y) => y === '0');
   const ux =
     chunk(nonZeroChars.reverse(), 4)
-      .map(x => {
+      .map((x) => {
         return x.reverse().join('');
       })
       .reverse()

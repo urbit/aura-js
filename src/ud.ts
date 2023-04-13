@@ -18,14 +18,8 @@ export function parseUd(ud: string): BigInteger {
  * @return {string}         the number as @ud
  */
 export function formatUd(ud: BigInteger): string {
-  const transform = chunk(
-    ud
-      .toString()
-      .split('')
-      .reverse(),
-    3
-  )
-    .map(group => group.reverse().join(''))
+  const transform = chunk(ud.toString().split('').reverse(), 3)
+    .map((group) => group.reverse().join(''))
     .reverse()
     .join('.');
   return transform.replace(/^[0\.]+/g, '');

@@ -75,7 +75,7 @@ export function patq2hex(name: string): string {
   const chunks = name.slice(1).split('-');
   const dec2hex = (dec: number) => dec.toString(16).padStart(2, '0');
 
-  const splat = chunks.map(chunk => {
+  const splat = chunks.map((chunk) => {
     let syls = splitAt(3, chunk);
     return syls[1] === ''
       ? dec2hex(suffixes.indexOf(syls[0]))

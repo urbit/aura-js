@@ -61,13 +61,7 @@ export function year(det: Dat) {
         d = d.add(isLeapYear(y) ? 36525 : 36524);
       } else {
         let eras = y.divide(bigInt(400));
-        d = d.add(
-          eras.multiply(
-            bigInt(4)
-              .multiply(bigInt(36524))
-              .next()
-          )
-        );
+        d = d.add(eras.multiply(bigInt(4).multiply(bigInt(36524)).next()));
         loop = false;
       }
     }
@@ -102,7 +96,7 @@ export function parseDa(x: string): BigInteger {
   const [date, time, ms] = x.split('..');
   const [yer, month, day] = date.slice(1).split('.');
   const [hour, minute, sec] = time.split('.');
-  const millis = ms.split('.').map(m => bigInt(m, 16));
+  const millis = ms.split('.').map((m) => bigInt(m, 16));
 
   return year({
     pos: true,
@@ -125,8 +119,8 @@ function yell(x: BigInteger): Tarp {
   const ms = millis
     .toString(16)
     .match(/.{1,4}/g)!
-    .filter(x => x !== '0000')
-    .map(x => bigInt(x, 16));
+    .filter((x) => x !== '0000')
+    .map((x) => bigInt(x, 16));
   let day = sec.divide(DAY_YO);
   sec = sec.mod(DAY_YO);
   let hor = sec.divide(HOR_YO);
@@ -213,7 +207,7 @@ export function formatDa(x: BigInteger | string) {
 
   return `~${year}.${month}.${time.day}..${time.hour}.${time.minute}.${
     time.second
-  }..${time.ms.map(x => x.toString(16).padStart(4, '0')).join('.')}`;
+  }..${time.ms.map((x) => x.toString(16).padStart(4, '0')).join('.')}`;
 }
 
 /**
@@ -228,10 +222,7 @@ export function daToUnix(da: BigInteger): number {
   const epochAdjusted = offset.add(da.subtract(DA_UNIX_EPOCH));
 
   return Math.round(
-    epochAdjusted
-      .multiply(bigInt(1000))
-      .divide(DA_SECOND)
-      .toJSNumber()
+    epochAdjusted.multiply(bigInt(1000)).divide(DA_SECOND).toJSNumber()
   );
 }
 
@@ -242,8 +233,6 @@ export function daToUnix(da: BigInteger): number {
  * @return  {BigInteger}        The urbit date
  */
 export function unixToDa(unix: number): BigInteger {
-  const timeSinceEpoch = bigInt(unix)
-    .multiply(DA_SECOND)
-    .divide(bigInt(1000));
+  const timeSinceEpoch = bigInt(unix).multiply(DA_SECOND).divide(bigInt(1000));
   return DA_UNIX_EPOCH.add(timeSinceEpoch);
 }

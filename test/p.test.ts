@@ -13,8 +13,8 @@ import {
 } from '../src';
 
 const patps = jsc.uint32.smap(
-  num => patp(num),
-  pp => parseInt(patp2dec(pp))
+  (num) => patp(num),
+  (pp) => parseInt(patp2dec(pp))
 );
 
 describe('@p', () => {
@@ -76,10 +76,10 @@ describe('@p', () => {
   it('patp and patp2dec are inverses', () => {
     let iso0 = jsc.forall(
       jsc.uint32,
-      num => parseInt(patp2dec(patp(num))) === num
+      (num) => parseInt(patp2dec(patp(num))) === num
     );
 
-    let iso1 = jsc.forall(patps, pp => patp(patp2dec(pp)) === pp);
+    let iso1 = jsc.forall(patps, (pp) => patp(patp2dec(pp)) === pp);
 
     jsc.assert(iso0);
     jsc.assert(iso1);
@@ -88,10 +88,10 @@ describe('@p', () => {
   it('patp2hex and hex2patp are inverses', () => {
     let iso0 = jsc.forall(
       jsc.uint32,
-      num => parseInt(patp2hex(hex2patp(num.toString(16))), 16) === num
+      (num) => parseInt(patp2hex(hex2patp(num.toString(16))), 16) === num
     );
 
-    let iso1 = jsc.forall(patps, pp => hex2patp(patp2hex(pp)) === pp);
+    let iso1 = jsc.forall(patps, (pp) => hex2patp(patp2hex(pp)) === pp);
 
     jsc.assert(iso0);
     jsc.assert(iso1);

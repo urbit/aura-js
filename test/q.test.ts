@@ -9,8 +9,8 @@ import {
 } from '../src';
 
 const patqs = jsc.uint32.smap(
-  num => patq(num),
-  pq => parseInt(patq2dec(pq))
+  (num) => patq(num),
+  (pq) => parseInt(patq2dec(pq))
 );
 
 describe('patq, etc.', () => {
@@ -59,10 +59,10 @@ describe('patq, etc.', () => {
   it('patq and patq2dec are inverses', () => {
     let iso0 = jsc.forall(
       jsc.uint32,
-      num => parseInt(patq2dec(patq(num))) === num
+      (num) => parseInt(patq2dec(patq(num))) === num
     );
 
-    let iso1 = jsc.forall(patqs, pp => patq(patq2dec(pp)) === pp);
+    let iso1 = jsc.forall(patqs, (pp) => patq(patq2dec(pp)) === pp);
 
     jsc.assert(iso0);
     jsc.assert(iso1);
@@ -71,10 +71,10 @@ describe('patq, etc.', () => {
   it('patq2hex and hex2patq are inverses', () => {
     let iso0 = jsc.forall(
       jsc.uint32,
-      num => parseInt(patq2hex(hex2patq(num.toString(16))), 16) === num
+      (num) => parseInt(patq2hex(hex2patq(num.toString(16))), 16) === num
     );
 
-    let iso1 = jsc.forall(patqs, pp => hex2patq(patq2hex(pp)) === pp);
+    let iso1 = jsc.forall(patqs, (pp) => hex2patq(patq2hex(pp)) === pp);
 
     jsc.assert(iso0);
     jsc.assert(iso1);

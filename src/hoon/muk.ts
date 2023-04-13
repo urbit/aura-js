@@ -17,10 +17,7 @@ const u_256 = bigInt(256);
  */
 export const muk = (syd: number, key: BigInteger) => {
   const lo = key.and(ux_FF).toJSNumber();
-  const hi = key
-    .and(ux_FF00)
-    .divide(u_256)
-    .toJSNumber();
+  const hi = key.and(ux_FF00).divide(u_256).toJSNumber();
   const kee = String.fromCharCode(lo) + String.fromCharCode(hi);
   return bigInt(murmurhash3_32_gc(kee, syd));
 };
