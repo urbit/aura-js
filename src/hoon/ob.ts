@@ -1,21 +1,11 @@
-import bigInt, { BigInteger } from 'big-integer';
 import { muk } from './muk';
 
 // ++  ob
 //
 // See arvo/sys/hoon.hoon.
 
-const ux_1_0000 = bigInt('10000', 16);
-const ux_ffff_ffff = bigInt('ffffffff', 16);
-const ux_1_0000_0000 = bigInt('100000000', 16);
-const ux_ffff_ffff_ffff_ffff = bigInt('ffffffffffffffff', 16);
-const ux_ffff_ffff_0000_0000 = bigInt('ffffffff00000000', 16);
-
-const u_65535 = bigInt('65535');
-const u_65536 = bigInt('65536');
-
 // a PRF for j in { 0, .., 3 }
-const F = (j: number, arg: BigInteger) => {
+const F = (j: number, arg: bigint): bigint => {
   const raku = [0xb76d5eed, 0xee281300, 0x85bcae01, 0x4b387af7];
 
   return muk(raku[j], arg);
@@ -24,43 +14,43 @@ const F = (j: number, arg: BigInteger) => {
 /**
  * Conceal structure v3.
  *
- * @param {String, Number, BigInteger} pyn
- * @return  {BigInteger}
+ * @param {String, Number, bigint} pyn
+ * @return  {bigint}
  */
-const fein = (arg: any): BigInteger => {
-  const loop = (pyn: BigInteger): BigInteger => {
-    const lo = pyn.and(ux_ffff_ffff);
-    const hi = pyn.and(ux_ffff_ffff_0000_0000);
+const fein = (arg: bigint): bigint => {
+  const loop = (pyn: bigint): bigint => {
+    const lo = pyn & 0xffffffffn;
+    const hi = pyn & 0xffffffff00000000n;
 
-    return pyn.geq(ux_1_0000) && pyn.leq(ux_ffff_ffff)
-      ? ux_1_0000.add(feis(pyn.subtract(ux_1_0000)))
-      : pyn.geq(ux_1_0000_0000) && pyn.leq(ux_ffff_ffff_ffff_ffff)
-      ? hi.or(loop(lo))
+    return (pyn >= 0x10000n) && (pyn <= 0xffffffffn)
+      ? (0x10000n + feis(pyn - 0x10000n))
+      : (pyn >= 0x100000000n) && (pyn <= 0xffffffffffffffffn)
+      ? (hi | loop(lo))
       : pyn;
   };
 
-  return loop(bigInt(arg));
+  return loop(arg);
 };
 
 /**
  * Restore structure v3.
  *
- * @param  {String, Number, BigInteger}  cry
- * @return  {BN}
+ * @param  {String, Number, bigint}  cry
+ * @return  {bigint}
  */
-const fynd = (arg: any) => {
-  const loop = (cry: BigInteger): BigInteger => {
-    const lo = cry.and(ux_ffff_ffff);
-    const hi = cry.and(ux_ffff_ffff_0000_0000);
+const fynd = (arg: bigint): bigint => {
+  const loop = (cry: bigint): bigint => {
+    const lo = cry & 0xffffffffn;
+    const hi = cry & 0xffffffff00000000n;
 
-    return cry.geq(ux_1_0000) && cry.leq(ux_ffff_ffff)
-      ? ux_1_0000.add(tail(cry.subtract(ux_1_0000)))
-      : cry.geq(ux_1_0000_0000) && cry.leq(ux_ffff_ffff_ffff_ffff)
-      ? hi.or(loop(lo))
+    return (cry >= 0x10000n) && (cry <= 0xffffffffn)
+      ? (0x10000n + tail(cry - 0x10000n))
+      : (cry >= 0x100000000n) && (cry <= 0xffffffffffffffffn)
+      ? (hi | loop(lo))
       : cry;
   };
 
-  return loop(bigInt(arg));
+  return loop(BigInt(arg));
 };
 
 /**
@@ -71,49 +61,49 @@ const fynd = (arg: any) => {
  * Note that this has been adjusted from the reference paper in order to
  * support some legacy behaviour.
  *
- * @param  {String, Number, BigInteger}
+ * @param  {String, Number, bigint}
  * @return  {BN}
  */
-const feis = (arg: any) =>
-  Fe(4, u_65535, u_65536, ux_ffff_ffff, F, bigInt(arg));
+const feis = (arg: bigint) =>
+  Fe(4, 65535n, 65536n, 0xffffffffn, F, arg);
 
 const Fe = (
   r: number,
-  a: BigInteger,
-  b: BigInteger,
-  k: BigInteger,
+  a: bigint,
+  b: bigint,
+  k: bigint,
   f: typeof F,
-  m: BigInteger
+  m: bigint
 ) => {
   const c = fe(r, a, b, f, m);
-  return c.lt(k) ? c : fe(r, a, b, f, c);
+  return (c < k) ? c : fe(r, a, b, f, c);
 };
 
 const fe = (
   r: number,
-  a: BigInteger,
-  b: BigInteger,
+  a: bigint,
+  b: bigint,
   f: typeof F,
-  m: BigInteger
+  m: bigint
 ) => {
-  const loop = (j: number, ell: BigInteger, arr: BigInteger): BigInteger => {
+  const loop = (j: number, ell: bigint, arr: bigint): bigint => {
     if (j > r) {
       return r % 2 !== 0
-        ? a.multiply(arr).add(ell)
-        : arr.eq(a)
-        ? a.multiply(arr).add(ell)
-        : a.multiply(ell).add(arr);
+        ? (a * arr) + ell
+        : arr === a
+        ? (a * arr) + ell
+        : (a * ell) + arr;
     } else {
-      const eff = f(j - 1, arr);
+      const eff = BigInt(f(j - 1, arr).toString());
 
-      const tmp = j % 2 !== 0 ? ell.add(eff).mod(a) : ell.add(eff).mod(b);
+      const tmp = j % 2 !== 0 ? ((ell + eff) % a) : ((ell + eff) % b);
 
       return loop(j + 1, arr, tmp);
     }
   };
 
-  const L = m.mod(a);
-  const R = m.divide(a);
+  const L = m % a;
+  const R = m / a;
 
   return loop(1, L, R);
 };
@@ -126,21 +116,21 @@ const fe = (
  * Note that this has been adjusted from the reference paper in order to
  * support some legacy behaviour.
  *
- * @param {Number, String, BN}  arg
- * @return  {BN}
+ * @param {bigint}  arg
+ * @return  {bigint}
  */
-const tail = (arg: any) =>
-  Fen(4, u_65535, u_65536, ux_ffff_ffff, F, bigInt(arg));
+const tail = (arg: bigint) =>
+  Fen(4, 65535n, 65536n, 0xffffffffn, F, arg);
 
 const Fen: typeof Fe = (r, a, b, k, f, m) => {
   const c = fen(r, a, b, f, m);
-  return c.lt(k) ? c : fen(r, a, b, f, c);
+  return (c < k) ? c : fen(r, a, b, f, c);
 };
 
 const fen: typeof fe = (r, a, b, f, m) => {
-  const loop = (j: number, ell: BigInteger, arr: BigInteger): BigInteger => {
+  const loop = (j: number, ell: bigint, arr: bigint): bigint => {
     if (j < 1) {
-      return a.multiply(arr).add(ell);
+      return (a * arr) + ell;
     } else {
       const eff = f(j - 1, ell);
 
@@ -152,20 +142,20 @@ const fen: typeof fe = (r, a, b, f, m) => {
       //
       const tmp =
         j % 2 !== 0
-          ? arr.add(a).subtract(eff.mod(a)).mod(a)
-          : arr.add(b).subtract(eff.mod(b)).mod(b);
+          ? ((arr + a) - (eff % a)) % a
+          : ((arr + b) - (eff % b)) % b;
 
       return loop(j - 1, tmp, ell);
     }
   };
 
-  const ahh = r % 2 !== 0 ? m.divide(a) : m.mod(a);
+  const ahh = r % 2 !== 0 ? (m / a) : (m % a);
 
-  const ale = r % 2 !== 0 ? m.mod(a) : m.divide(a);
+  const ale = r % 2 !== 0 ? (m % a) : (m / a);
 
-  const L = ale.eq(a) ? ahh : ale;
+  const L = ale === a ? ahh : ale;
 
-  const R = ale.eq(a) ? ale : ahh;
+  const R = ale === a ? ale : ahh;
 
   return loop(r, L, R);
 };

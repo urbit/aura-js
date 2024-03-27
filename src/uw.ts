@@ -1,31 +1,29 @@
-import bigInt, { BigInteger } from 'big-integer';
 import { chunkFromRight } from './utils';
 
-const uwMask = bigInt(63);
 const uwAlphabet =
   '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-~';
 
 export function parseUw(x: string) {
-  let res = bigInt(0);
+  let res = 0n;
   x = x.slice(2);
   while (x !== '') {
     if (x[0] !== '.') {
-      res = res.shiftLeft(6).add(uwAlphabet.indexOf(x[0]));
+      res = (res << 6n) + BigInt(uwAlphabet.indexOf(x[0]));
     }
     x = x.slice(1);
   }
   return res;
 }
 
-export function formatUw(x: BigInteger | string) {
+export function formatUw(x: bigint | string) {
   if (typeof x === 'string') {
-    x = bigInt(x);
+    x = BigInt(x);
   }
   let res = '';
-  while (x.neq(bigInt.zero)) {
-    let nextSix = x.and(uwMask).toJSNumber();
+  while (x !== 0n) {
+    let nextSix = Number(BigInt.asUintN(6, x));
     res = uwAlphabet[nextSix] + res;
-    x = x.shiftRight(6);
+    x = x >> 6n;
   }
   return `0w${chunkFromRight(res, 5).join('.')}`;
 }

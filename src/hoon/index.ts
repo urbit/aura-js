@@ -1,8 +1,3 @@
-import bigInt, { BigInteger } from 'big-integer';
-
-const zero = bigInt(0);
-const one = bigInt(1);
-const two = bigInt(2);
 
 export const pre = `
 dozmarbinwansamlitsighidfidlissogdirwacsabwissib\
@@ -45,16 +40,16 @@ lyrtesmudnytbyrsenwegfyrmurtelreptegpecnelnevfes\
 export const prefixes = pre.match(/.{1,3}/g) as RegExpMatchArray;
 export const suffixes = suf.match(/.{1,3}/g) as RegExpMatchArray;
 
-export const bex = (n: BigInteger) => two.pow(n);
+export const bex = (n: bigint) => 2n ** n;
 
-export const rsh = (a: BigInteger, b: BigInteger, c: BigInteger) =>
-  c.divide(bex(bex(a).multiply(b)));
+export const rsh = (a: bigint, b: bigint, c: bigint) =>
+  c / bex(bex(a) * b);
 
-export const met = (a: BigInteger, b: BigInteger, c = zero): BigInteger =>
-  b.eq(zero) ? c : met(a, rsh(a, one, b), c.add(one));
+export const met = (a: bigint, b: bigint, c = 0n): bigint =>
+  (b === 0n) ? c : met(a, rsh(a, 1n, b), c + 1n);
 
-export const end = (a: BigInteger, b: BigInteger, c: BigInteger) =>
-  c.mod(bex(bex(a).multiply(b)));
+export const end = (a: bigint, b: bigint, c: bigint) =>
+  c % bex(bex(a) * b);
 
 export const patp2syls = (name: string): string[] =>
   name.replace(/[\^~-]/g, '').match(/.{1,3}/g) || [];

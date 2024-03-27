@@ -1,4 +1,3 @@
-import bigInt, { BigInteger } from 'big-integer';
 import {
   isValidPat,
   patp2syls,
@@ -10,13 +9,6 @@ import {
 } from './hoon';
 import ob from './hoon/ob';
 
-const zero = bigInt(0);
-const one = bigInt(1);
-const two = bigInt(2);
-const three = bigInt(3);
-const four = bigInt(4);
-const five = bigInt(5);
-
 /**
  * Convert a hex-encoded string to a @p-encoded string.
  *
@@ -27,7 +19,7 @@ export function hex2patp(hex: string): string {
   if (hex === null) {
     throw new Error('hex2patp: null input');
   }
-  return patp(bigInt(hex, 16));
+  return patp(BigInt('0x'+hex));
 }
 
 /**
@@ -52,7 +44,7 @@ export function patp2hex(name: string): string {
     ''
   );
 
-  const bn = bigInt(addr, 2);
+  const bn = BigInt('0b'+addr);
   const hex = ob.fynd(bn).toString(16);
   return hex.length % 2 !== 0 ? hex.padStart(hex.length + 1, '0') : hex;
 }
@@ -61,10 +53,10 @@ export function patp2hex(name: string): string {
  * Convert a @p-encoded string to a bignum.
  *
  * @param  {String}  name @p
- * @return  {BigInteger}
+ * @return  {bigint}
  */
-export function patp2bn(name: string): BigInteger {
-  return bigInt(patp2hex(name), 16);
+export function patp2bn(name: string): bigint {
+  return BigInt('0x'+patp2hex(name));
 }
 
 /**
@@ -74,7 +66,7 @@ export function patp2bn(name: string): BigInteger {
  * @return  {String}
  */
 export function patp2dec(name: string): string {
-  let bn: BigInteger;
+  let bn: bigint;
   try {
     bn = patp2bn(name);
   } catch (_) {
@@ -90,21 +82,21 @@ export function patp2dec(name: string): string {
  * @return  {String}
  */
 export function clan(who: string): string {
-  let name: BigInteger;
+  let name: bigint;
   try {
     name = patp2bn(who);
   } catch (_) {
     throw new Error('clan: not a valid @p');
   }
 
-  const wid = met(three, name);
-  return wid.leq(one)
+  const wid = met(3n, name);
+  return wid <= 1n
     ? 'galaxy'
-    : wid.eq(two)
+    : wid === 2n
     ? 'star'
-    : wid.leq(four)
+    : wid <= 4n
     ? 'planet'
-    : wid.leq(bigInt(8))
+    : wid <= 8n
     ? 'moon'
     : 'comet';
 }
@@ -116,7 +108,7 @@ export function clan(who: string): string {
  * @return  {String}
  */
 export function sein(name: string): string {
-  let who: BigInteger;
+  let who: bigint;
   try {
     who = patp2bn(name);
   } catch (_) {
@@ -134,12 +126,12 @@ export function sein(name: string): string {
     mir === 'galaxy'
       ? who
       : mir === 'star'
-      ? end(three, one, who)
+      ? end(3n, 1n, who)
       : mir === 'planet'
-      ? end(four, one, who)
+      ? end(4n, 1n, who)
       : mir === 'moon'
-      ? end(five, one, who)
-      : zero;
+      ? end(5n, 1n, who)
+      : 0n;
   return patp(res);
 }
 
@@ -156,33 +148,33 @@ export function isValidPatp(str: string): boolean {
 /**
  * Convert a number to a @p-encoded string.
  *
- * @param  {String, Number, BN}  arg
+ * @param  {String, Number, bigint}  arg
  * @return  {String}
  */
-export function patp(arg: string | number | BigInteger) {
+export function patp(arg: string | number | bigint) {
   if (arg === null) {
     throw new Error('patp: null input');
   }
-  const n = bigInt(arg as any);
+  const n = BigInt(arg);
 
   const sxz = ob.fein(n);
-  const dyy = met(four, sxz);
+  const dyy = met(4n, sxz);
 
-  function loop(tsxz: BigInteger, timp: BigInteger, trep: string): string {
-    const log = end(four, one, tsxz);
-    const pre = prefixes[rsh(three, one, log).toJSNumber()];
-    const suf = suffixes[end(three, one, log).toJSNumber()];
-    const etc = timp.mod(four).eq(zero) ? (timp.eq(zero) ? '' : '--') : '-';
+  function loop(tsxz: bigint, timp: bigint, trep: string): string {
+    const log = end(4n, 1n, tsxz);
+    const pre = prefixes[Number(rsh(3n, 1n, log))];
+    const suf = suffixes[Number(end(3n, 1n, log))];
+    const etc = (timp % 4n) === 0n ? ((timp === 0n) ? '' : '--') : '-';
 
     const res = pre + suf + etc + trep;
 
-    return timp.eq(dyy) ? trep : loop(rsh(four, one, tsxz), timp.add(one), res);
+    return timp === dyy ? trep : loop(BigInt(rsh(4n, 1n, tsxz).toString()), timp + 1n, res);
   }
 
-  const dyx = met(three, sxz);
+  const dyx = BigInt(met(3n, sxz).toString());
 
   return (
-    '~' + (dyx.leq(one) ? suffixes[sxz.toJSNumber()] : loop(sxz, zero, ''))
+    '~' + (dyx <= 1n ? suffixes[Number(sxz)] : loop(BigInt(sxz.toString()), 0n, ''))
   );
 }
 
