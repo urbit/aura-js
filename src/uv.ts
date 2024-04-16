@@ -3,7 +3,7 @@ import { chunkFromRight } from './utils';
 const uvAlphabet = '0123456789abcdefghijklmnopqrstuv';
 
 export function parseUv(x: string) {
-  let res = 0n;  //TODO  0n
+  let res = 0n;
   x = x.slice(2);
   while (x !== '') {
     if (x[0] !== '.') {

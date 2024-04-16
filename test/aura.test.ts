@@ -94,7 +94,7 @@ describe('@uw', () => {
 });
 
 const UV_PAIRS: [string, bigint][] = [
-  ['0v16i', 1234n],  //TODO  1234n
+  ['0v16i', 1234n],
   [
     '0v1d0.l2h7n.mo1ro.s3r8e.4f6gd.dfsp1.hc5en.a0k8j.1v7vk.16jqd.oog39.5ool7.mrkdp.vvofi.gd2d6.vnmi9.a1dlt.7lbbm.iq76k.u5ivc.pp8qa',
     BigInt(
