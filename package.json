@@ -1,8 +1,7 @@
 {
-  "version": "1.0.0",
+  "version": "2.0.0",
   "license": "MIT",
   "name": "@urbit/aura",
-  "author": "Liam Fitzgerald",
   "module": "dist/aura.esm.js",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
