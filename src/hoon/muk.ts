@@ -1,25 +1,20 @@
-import bigInt, { BigInteger } from 'big-integer';
 // ++  muk
 //
 // See arvo/sys/hoon.hoon.
-
-const ux_FF = bigInt(0xff);
-const ux_FF00 = bigInt(0xff00);
-const u_256 = bigInt(256);
 
 /**
  * Standard murmur3.
  *
  * @param  {Number}       syd
  * @param  {Number}       len
- * @param  {BigInteger}   key
- * @return {BigInteger}
+ * @param  {bigint}       key
+ * @return {bigint}
  */
-export const muk = (syd: number, key: BigInteger) => {
-  const lo = key.and(ux_FF).toJSNumber();
-  const hi = key.and(ux_FF00).divide(u_256).toJSNumber();
+export const muk = (syd: number, key: bigint): bigint => {
+  const lo = Number(key & 0xffn);
+  const hi = Number((key & 0xff00n) / 256n);
   const kee = String.fromCharCode(lo) + String.fromCharCode(hi);
-  return bigInt(murmurhash3_32_gc(kee, syd));
+  return BigInt(murmurhash3_32_gc(kee, syd));
 };
 
 // see: https://github.com/garycourt/murmurhash-js

@@ -1,16 +1,21 @@
-import bigInt, { BigInteger } from 'big-integer';
 import { isValidPat, prefixes, suffixes } from './hoon';
 import { chunk, splitAt } from './utils';
+
+//TODO  investigate whether native UintArrays are more portable
+//      than node Buffers
 
 /**
  * Convert a number to a @q-encoded string.
  *
- * @param  {String, Number, BN}  arg
+ * @param  {String, Number, bigint}  arg
  * @return  {String}
  */
-export function patq(arg: string | number | BigInteger) {
-  const bn = bigInt(arg as any);
-  const buf = Buffer.from(bn.toArray(256).value);
+export function patq(arg: string | number | bigint) {
+  const bn = BigInt(arg);
+  //NOTE  stupid hack to work around bad node Buffer spec
+  const hex = bn.toString(16);
+  const lex = hex.length;
+  const buf = Buffer.from(hex.padStart(lex+lex%2, '0'), 'hex');
   return buf2patq(buf);
 }
 
@@ -89,9 +94,9 @@ export function patq2hex(name: string): string {
  * Convert a @q-encoded string to a bignum.
  *
  * @param  {String}  name @q
- * @return  {BigInteger}
+ * @return  {bigint}
  */
-export const patq2bn = (name: string): BigInteger => bigInt(patq2hex(name), 16);
+export const patq2bn = (name: string): bigint => BigInt('0x'+patq2hex(name));
 
 /**
  * Convert a @q-encoded string to a decimal-encoded string.
@@ -100,7 +105,7 @@ export const patq2bn = (name: string): BigInteger => bigInt(patq2hex(name), 16);
  * @return  {String}
  */
 export function patq2dec(name: string): string {
-  let bn: BigInteger;
+  let bn: bigint;
   try {
     bn = patq2bn(name);
   } catch (_) {
