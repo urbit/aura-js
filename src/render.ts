@@ -106,7 +106,7 @@ export function rend(coin: coin): string {
             case 'i': return '0i' + dco(1, coin.atom);
             case 'x': return '0x' + split(coin.atom.toString(16), 4);
             case 'v': return '0v' + split(coin.atom.toString(32), 5);
-            case 'w': return formatUw(coin.atom);  //TODO  fix 0n case
+            case 'w': return '0w' + split(blend(6, UW_ALPHABET, coin.atom), 5);
             default: return split(coin.atom.toString(10), 3);
           }
         case 's':
@@ -156,6 +156,18 @@ function zco(atom: bigint): string {
 
 function wack(str: string) {
   return str.replaceAll('~', '~~').replaceAll('_', '~-');
+}
+
+const UW_ALPHABET = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-~';
+function blend(bits: number, alphabet: string, atom: bigint): string {
+  if (atom === 0n) return alphabet[0];
+  let out = '';
+  const bbits = BigInt(bits);
+  while (atom !== 0n) {
+    out = alphabet[Number(BigInt.asUintN(bits, atom))] + out;
+    atom = atom >> bbits;
+  }
+  return out;
 }
 
 function split(str: string, group: number): string {
