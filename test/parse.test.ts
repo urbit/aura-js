@@ -18,6 +18,23 @@ import { parse, aura } from '../src/parse';
 //TODO  test for parse failures: leading zeroes, date out of range, etc
 //TODO  test for non-standard-but-accepted cases: leading 0 in hex chars, weird dates, etc.
 
+describe('limited auras', () => {
+  describe(`@n parsing`, () => {
+    it('parses', () => {
+      const res = parse('n', '~');
+      expect(res).toEqual(0n);
+    });
+  });
+  describe(`@f parsing`, () => {
+    it('parses', () => {
+      const yea = parse('f', '.y');
+      expect(yea).toEqual(0n);
+      const nay = parse('f', '.n');
+      expect(nay).toEqual(1n);
+    });
+  });
+});
+
 function testAuras(desc: string, auras: aura[], tests: { n: bigint }[]) {
   describe(`${desc} auras`, () => {
     auras.map((a) => {
@@ -29,7 +46,7 @@ function testAuras(desc: string, auras: aura[], tests: { n: bigint }[]) {
               // @ts-ignore we know this is sane/safe
               const res = parse(a, test[a]);
               expect(res).toEqual(test.n);
-            })
+            });
           });
         });
       });
