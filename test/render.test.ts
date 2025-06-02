@@ -305,6 +305,41 @@ const DATE_TESTS: {
 ];
 testAuras('date', DATE_AURAS, DATE_TESTS);
 
+const TEXT_AURAS: aura[] = [ 'tas', 'ta', 't' ];
+const TEXT_TESTS: {
+  n: bigint,
+  tas: string,
+  ta: string,
+  t: string
+}[] = [
+  { n: 0n,
+    tas: '',
+    ta: '~.',
+    t: '~~'
+  },
+  { n: 97n,
+    tas: 'a',
+    ta: '~.a',
+    t: '~~a'
+  },
+  { n: 121404708502375659064812904n,
+    tas: 'hello-world',
+    ta: '~.hello-world',
+    t: '~~hello-world'
+  },
+  { n: 10334410032597741434076685640n,
+    tas: 'Hello World!',
+    ta: '~.Hello World!',
+    t: '~~~48.ello.~57.orld~21.'
+  },
+  { n: 294301677938177654314463611973797746852183254758760570046179940746240825570n,
+    tas: '★🤠yeehaw👨‍👧‍👦',
+    ta: '~.★🤠yeehaw👨‍👧‍👦',
+    t: '~~~2605.~1f920.yeehaw~1f468.~200d.~1f467.~200d.~1f466.'
+  }
+];
+testAuras('text', TEXT_AURAS, TEXT_TESTS);
+
 const MANY_COINS: {
   coin: coin,
   out: string
@@ -321,7 +356,7 @@ const MANY_COINS: {
 ]
 describe('%many coin rendering', () => {
   MANY_COINS.map((test) => {
-    describe(`case ${test.out}`, () => {
+    describe(test.out, () => {
       it('renders', () => {
         const res = rend(test.coin);
         expect(res).toEqual(test.out);

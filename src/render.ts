@@ -117,12 +117,12 @@ export function rend(coin: coin): string {
         case 't':
           if (coin.aura[1] === 'a') {
             if (coin.aura[2] === 's') {
-              return 'coin.atom';  //TODO  fromCord
+              return cordToString(coin.atom);
             } else {
-              return '~.' + 'coin.atom';  //TODO  fromCord
+              return '~.' + cordToString(coin.atom);
             }
           } else {
-            return '~~' + 'coin.atom';  //TODO  fromCord(wood(coin.atom))
+            return '~~' + encodeString(cordToString(coin.atom));
           }
         default:
           return zco(coin.atom);
@@ -158,6 +158,52 @@ function wack(str: string) {
   return str.replaceAll('~', '~~').replaceAll('_', '~-');
 }
 
+//  encodeString(): encode string into @ta-safe format
+//
+//    using logic from +wood.
+//    for example, 'some Chars!' becomes '~.some.~43.hars~21.'
+//    this is url-safe encoding for arbitrary strings.
+//
+export function encodeString(string: string) {
+  let out = '';
+  for (let i = 0; i < string.length; i += 1) {
+    const char = string[i];
+    let add = '';
+    switch (char) {
+      case ' ':
+        add = '.';
+        break;
+      case '.':
+        add = '~.';
+        break;
+      case '~':
+        add = '~~';
+        break;
+      default: {
+        const codePoint = string.codePointAt(i);
+        if (!codePoint) break;
+        //  js strings are encoded in UTF-16, so 16 bits per character.
+        //  codePointAt() reads a _codepoint_ at a character index, and may
+        //  consume up to two js string characters to do so, in the case of
+        //  16 bit surrogate pseudo-characters. here we detect that case, so
+        //  we can advance the cursor to skip past the additional character.
+        if (codePoint > 0xffff) i += 1;
+        if (
+          (codePoint >= 97 && codePoint <= 122) || // a-z
+          (codePoint >= 48 && codePoint <= 57) || // 0-9
+          char === '-'
+        ) {
+          add = char;
+        } else {
+          add = `~${codePoint.toString(16)}.`;
+        }
+      }
+    }
+    out += add;
+  }
+  return out;
+}
+
 const UW_ALPHABET = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-~';
 function blend(bits: number, alphabet: string, atom: bigint): string {
   if (atom === 0n) return alphabet[0];
@@ -176,3 +222,22 @@ function split(str: string, group: number): string {
   return str.replace(new RegExp(`(?=(?:.{${group}})+$)(?!^)`, 'g'), '.');
 }
 
+function cordToString(atom: bigint): string {
+  return new TextDecoder('utf-8').decode(atomToByteArray(atom).reverse());
+};
+
+//NOTE  from nockjs' bigIntToByteArray
+//REVIEW  original produced [0] for 0n... probably not correct in our contexts!
+function atomToByteArray(atom: bigint): Uint8Array {
+  if (atom === 0n) return new Uint8Array(0);
+  const hexString = atom.toString(16);
+  const paddedHexString = hexString.length % 2 === 0 ? hexString : '0' + hexString;
+  const arrayLength = paddedHexString.length / 2;
+  const int8Array = new Uint8Array(arrayLength);
+  for (let i = 0; i < paddedHexString.length; i += 2) {
+    const hexSubstring = paddedHexString.slice(i, i + 2);
+    const signedInt = (parseInt(hexSubstring, 16) << 24) >> 24;
+    int8Array[(i / 2)] = signedInt;
+  }
+  return int8Array;
+}
