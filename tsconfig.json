@@ -4,6 +4,6 @@
   "compilerOptions": {
     "module": "esnext",
     "moduleResolution": "nodenext",
-    "target": "es2020"
+    "target": "es2021"
   }
 }
