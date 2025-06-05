@@ -116,7 +116,7 @@ export function nuck(str: string): coin | null {
   const c = str[0];
   if (c >= 'a' && c <= 'z') {  //  "sym"
     if (regex['tas'].test(str)) {
-      return { type: 'dime', aura: 'tas', atom: fromString(str) };
+      return { type: 'dime', aura: 'tas', atom: stringToCord(str) };
     } else {
       return null;
     }
@@ -196,15 +196,15 @@ export function nuck(str: string): coin | null {
       //TODO  test if these single-character checks affect performance or no,
       //      or if we want to move them further up, etc.
       if (str[1] === '.' && regex['ta'].test(str)) {
-        return { type: 'dime', aura: 'ta', atom: fromString(str.slice(2)) };
+        return { type: 'dime', aura: 'ta', atom: stringToCord(str.slice(2)) };
       } else
       if (str[1] === '~' && regex['t'].test(str)) {
-        //TODO  known-wrong! extract encoded byte-sequences
-        return { type: 'dime', aura: 't', atom: fromString(str.slice(2)) };
+        return { type: 'dime', aura: 't', atom: stringToCord(decodeString(str.slice(2))) };
       } else
       if (str[1] === '-' && regex['c'].test(str)) {
         //TODO  known-wrong! extract encoded byte-sequences and call +taft
-        return { type: 'dime', aura: 'c', atom: fromString(str.slice(2)) };
+        //      ...or just extract as single utf-32 character?
+        return { type: 'dime', aura: 'c', atom: stringToCord(decodeString(str.slice(2))) };
       }
     }
     //TODO  twid for %blob support
@@ -266,17 +266,62 @@ export function bisk(str: string): dime | null {
   }
 }
 
-//TODO  this is basically nockjs' Atom.fromCord
-function fromString(str: string): bigint {
-  if (str.length === 0) return 0n;
-  let i,
-    j,
-    octs = Array(str.length);
-  for (i = 0, j = octs.length - 1; i < octs.length; ++i, --j) {
-    const charByte = (str.charCodeAt(i) & 0xff).toString(16);
-    octs[j] = charByte.length === 1 ? "0" + charByte : charByte;
+//  decodeString(): decode string from @ta-safe format
+//
+//    using logic from +woad.
+//    for example, '~.some.~43.hars~21.' becomes 'some Chars!'
+//    assumes
+//
+export function decodeString(str: string): string {
+  let out = '';
+  let i = 0;
+  while (i < str.length) {
+    switch (str[i]) {
+      case '.':
+        out = out + ' ';
+        i++; continue;
+      case '~':
+        switch (str[++i]) {
+          case '~':
+            out = out + '~';
+            i++; continue;
+          case '.':
+            out = out + '.';
+            i++; continue;
+          default:
+            let char: number = 0;
+            do {
+              char = (char << 4) | Number.parseInt(str[i++], 16);
+            } while (str[i] !== '.')
+            out = out + String.fromCodePoint(char);
+            i++; continue;
+        }
+      default:
+        out = out + str[i++];
+        continue;
+    }
   }
-  return BigInt('0x' + octs.join(''));
-  // if (str.length > 4) return BigInt('0x' + octs.join(''));
-  // else return BigInt(parseInt(octs.join(""), 16));
+  return out;
+}
+
+function stringToCord(str: string): bigint {
+  return bytesToBigint(new TextEncoder().encode(str));
+}
+
+//REVIEW  should the reversal happen here or at callsites? depends on what endianness is idiomatic to js?
+function bytesToBigint(bytes: Uint8Array): bigint {
+  //  if we have node's Buffer available, use it, it's wicked fast.
+  //  otherwise, constructing the hex string "by hand" and instantiating
+  //  a bigint from that is the fastest thing we can do.
+  //
+  if (typeof Buffer !== 'undefined')
+    return BigInt('0x' + Buffer.from(bytes.reverse()).toString('hex'));
+  let byt: number,
+    parts: string[] = [];
+  for (var i = bytes.length - 1; i >= 0; --i) {
+    byt = bytes[i];
+    parts.push(byt < 16 ? "0" + byt.toString(16) : byt.toString(16));
+  }
+  const num = BigInt('0x' + parts.join(''));
+  return num;
 }

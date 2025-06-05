@@ -1,4 +1,4 @@
-import { parse, aura } from '../src/parse';
+import { parse, aura, decodeString } from '../src/parse';
 
 //  most test cases generated from snippets similar to the following:
 //
@@ -313,4 +313,30 @@ const DATE_TESTS: {
 ];
 testAuras('phonetic', DATE_AURAS, DATE_TESTS);
 
+describe('string decoding', () => {
+  it('decodes', () => {
+    expect(decodeString('a~62.c')).toEqual('abc');
+    expect(decodeString('a~0a.c')).toEqual('a\nc');
+    expect(decodeString('~2605.~1f920.yeehaw~1f468.~200d.~1f467.~200d.~1f466.')).toEqual('★🤠yeehaw👨‍👧‍👦');
+  });
+});
 
+const TEXT_AURAS: aura[] = [ 't' ];
+const TEXT_TESTS: {
+  n: bigint,
+  t: string
+}[] = [
+    { 'n': 6513249n,
+      't': '~~abc'
+    },
+    { 'n': 127430240531865354190938721n,
+      't': '~~abc~~def~.ghi'
+    },
+    { 'n': 6513249n,
+      't': '~~a~62.c'
+    },
+    { 'n': 294301677938177654314463611973797746852183254758760570046179940746240825570n,
+      't': '~~~2605.~1f920.yeehaw~1f468.~200d.~1f467.~200d.~1f466.'
+    }
+  ];
+testAuras('text', TEXT_AURAS, TEXT_TESTS);
