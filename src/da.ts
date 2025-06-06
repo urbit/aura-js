@@ -117,10 +117,12 @@ function yell(x: bigint): Tarp {
   const milliMask = BigInt('0xffffffffffffffff');
   const millis = milliMask & x;
   const ms = millis
-    .toString(16)
-    .match(/.{1,4}/g)!
-    .filter((x) => x !== '0000')
+    .toString(16).padStart(16, '0')
+    .match(/.{4}/g)!
     .map((x) => BigInt('0x'+x));
+  while (ms.at(-1) === 0n) {
+    ms.pop();
+  }
   let day = sec / DAY_YO;
   sec = sec % DAY_YO;
   let hor = sec / HOR_YO;
@@ -203,11 +205,15 @@ export function formatDa(x: bigint | string) {
   if (typeof x === 'string') {
     x = BigInt(x);
   }
-  const { year, month, time } = yore(x);
-
-  return `~${year}.${month}.${time.day}..${time.hour}.${time.minute}.${
-    time.second
-  }..${time.ms.map((x) => x.toString(16).padStart(4, '0')).join('.')}`;
+  const { pos, year, month, time } = yore(x);
+  let out = `~${year}${pos ? '' : '-'}.${month}.${time.day}`;
+  if (time.hour !== 0n || time.minute !== 0n || time.second !== 0n || time.ms.length !== 0) {
+    out = out + `..${time.hour.toString().padStart(2, '0')}.${time.minute.toString().padStart(2, '0')}.${time.second.toString().padStart(2, '0')}`
+    if (time.ms.length !== 0) {
+      out = out + `..${time.ms.map((x) => x.toString(16).padStart(4, '0')).join('.')}`;
+    }
+  }
+  return out;
 }
 
 /**
