@@ -307,11 +307,14 @@ const DATE_TESTS: {
   { 'n': 170141184492616163062707000439658774528n,
     'da': '~2000.1.1..11.11.11..aabb.0000'
   },
+  { 'n': 170141184492616163062707000439658774528n,
+    'da': '~2000.1.1..11.11.11..aabb'
+  },
   { 'n': 170141184492615487727406687186543706111n,
     'da': '~2000.1.1..1.1.1..aabb.ccdd.eeff.ffff'
   }
 ];
-testAuras('phonetic', DATE_AURAS, DATE_TESTS);
+testAuras('date', DATE_AURAS, DATE_TESTS);
 
 describe('string decoding', () => {
   it('decodes', () => {

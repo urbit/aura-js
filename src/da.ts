@@ -93,13 +93,20 @@ export function year(det: Dat) {
  * @return  {bigint}      x  The urbit date as bigint
  */
 export function parseDa(x: string): bigint {
-  const [date, time, ms] = x.split('..');
-  const [yer, month, day] = date.slice(1).split('.');
+  let pos = true;
+  let [date, time, ms] = x.split('..');
+  time = time || '0.0.0';
+  ms = ms || '0000';
+  let [yer, month, day] = date.slice(1).split('.');
+  if (yer.at(-1) === '-') {
+    yer = yer.slice(0, -1);
+    pos = false;
+  }
   const [hour, minute, sec] = time.split('.');
   const millis = ms.split('.').map((m) => BigInt('0x'+m));
 
   return year({
-    pos: true,
+    pos: pos,
     year: BigInt(yer),
     month: BigInt(month),
     time: {
