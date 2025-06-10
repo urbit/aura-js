@@ -63,7 +63,14 @@ export function rend(coin: coin): string {
     case 'dime':
       switch(coin.aura[0]) {
         case 'c':
-          throw new Error('aura-js: @c rendering unsupported'); //TODO
+          //  this short-circuits the (wood (tuft atom)) calls that
+          //  hoon.hoon does, leaning on wood only for ascii characters,
+          //  and going straight to encoded representation for anything else.
+          //  (otherwise we'd need to stringify the utf-32 bytes, ouch.)
+          if (coin.atom < 0x7fn)
+            return '~-' + encodeString(String.fromCharCode(Number(coin.atom)));
+          else
+            return '~-~' + coin.atom.toString(16) + '.';
         case 'd':
           switch(coin.aura[1]) {
             case 'a':
