@@ -264,6 +264,19 @@ const PHONETIC_TESTS: {
     'p': '~tipwep-danner-minlyx-posned--mapmun-matlud-sitreb-balweg',
     'q': '.~tipwep-danner-minlyx-posned-mapmun-matlud-sitreb-balweg',
   },
+  //  with zero bytes
+  { 'n': 3833668n,
+    'p': '~nidmes-samrut',
+    'q': '.~sef-palsub'
+  },
+  { 'n': 319478973361751151n,
+    'p': '~sampel-sampel-lacwyl-tirder',
+    'q': '.~sampel-sampel-dozpel-sampel',
+  },
+  { 'n': 319478973354476655n,
+    'p': '~sampel-sampel-dozzod-sampel',
+    'q': '.~sampel-sampel-dozzod-sampel',
+  },
 ];
 testAuras('phonetic', PHONETIC_AURAS, PHONETIC_TESTS);
 

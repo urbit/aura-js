@@ -33,8 +33,8 @@ function buf2patq(buf: Buffer): string {
 
   const prefixName = (byts: number[]) =>
     byts[1] === undefined
-      ? prefixes[0] + suffixes[byts[0]]
-      : prefixes[byts[0]] + suffixes[byts[1]];
+      ? suffixes[byts[0]]
+      : prefixes[byts[0]] + suffixes[byts[1]];  //TODO  this branch unused
 
   const name = (byts: number[]) =>
     byts[1] === undefined
