@@ -328,6 +328,7 @@ function stringToCord(str: string): bigint {
 
 //REVIEW  should the reversal happen here or at callsites? depends on what endianness is idiomatic to js?
 function bytesToBigint(bytes: Uint8Array): bigint {
+  if (bytes.length === 0) return 0n;
   //  if we have node's Buffer available, use it, it's wicked fast.
   //  otherwise, constructing the hex string "by hand" and instantiating
   //  a bigint from that is the fastest thing we can do.
