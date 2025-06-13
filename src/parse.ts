@@ -10,8 +10,6 @@ import { aura, dime, coin } from './types';
 import { parseDa } from './da';
 import { isValidPatp, patp2bn } from './p';
 import { isValidPatq, patq2bn } from './q';
-import { parseUv } from './uv';
-import { parseUw } from './uw';
 
 function integerRegex(a: string, b: string, c: string, d: number, e: boolean = false): RegExp {
   const pre = d === 0 ? b       : `${b}${c}{0,${d-1}}`;
@@ -198,7 +196,7 @@ export function nuck(str: string): coin | null {
       }
     }
     if ((str[1] === '0') && /^~0[0-9a-v]+$/.test(str)) {
-      return { type: 'blob', jam: parseUv('0v' + str.slice(2)) };
+      return { type: 'blob', jam: slurp(5, UV_ALPHABET, str.slice(2)) };
     }
     return null;
   }
@@ -237,14 +235,14 @@ export function bisk(str: string): dime | null {
 
     case '0v':  //  "viz"
       if (regex['uv'].test(str)) {
-        return { aura: 'uv', atom: parseUv(str) };
+        return { aura: 'uv', atom: slurp(5, UV_ALPHABET, str.slice(2)) };
       } else {
         return null;
       }
 
     case '0w':  //  "wiz"
       if (regex['uw'].test(str)) {
-        return { aura: 'uw', atom: parseUw(str) };
+        return { aura: 'uw', atom: slurp(6, UW_ALPHABET, str.slice(2)) };
       } else {
         return null;
       }
@@ -298,6 +296,20 @@ export function decodeString(str: string): string {
 
 function stringToCord(str: string): bigint {
   return bytesToBigint(new TextEncoder().encode(str));
+}
+
+const UW_ALPHABET = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-~';
+const UV_ALPHABET = '0123456789abcdefghijklmnopqrstuv';
+function slurp(bits: number, alphabet: string, str: string): bigint {
+  let out = 0n;
+  const bbits = BigInt(bits);
+  while (str !== '') {
+    if (str[0] !== '.') {
+      out = (out << bbits) + BigInt(alphabet.indexOf(str[0]));
+    }
+    str = str.slice(1);
+  }
+  return out;
 }
 
 //REVIEW  should the reversal happen here or at callsites? depends on what endianness is idiomatic to js?
