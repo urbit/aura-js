@@ -119,7 +119,7 @@ export function rend(coin: coin): string {
         case 's':
           const end = (coin.atom & 1n);
           coin.atom = end + (coin.atom >> 1n);
-          coin.aura = coin.aura.replace('u', 's') as aura;
+          coin.aura = coin.aura.replace('s', 'u') as aura;
           return ((end === 0n) ? '--' : '-') + rend(coin);
         case 't':
           if (coin.aura[1] === 'a') {
