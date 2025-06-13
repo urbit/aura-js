@@ -4,7 +4,7 @@ import render from "../src/render";
 const testCount = 500;
 
 const auras: aura[] = [
-  // 'c',  //TODO  known-broken parsing
+  'c',
   'da',
   // 'dr', //TODO  unsupported
   // 'f',  //  limited legitimate values

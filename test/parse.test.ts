@@ -470,6 +470,30 @@ const TEXT_TESTS: {
   ];
 testAuras('text', TEXT_AURAS, TEXT_TESTS);
 
+const CHAR_AURAS: aura[] = ['c'];
+const CHAR_TESTS: { n: bigint, c: string }[] = [
+  { n: 129312n, c: '~-~1f920.' },
+  { n: 128104n, c: '~-~1f468.' },
+  { n: 8205n, c: '~-~200d.' },
+  { n: 128103n, c: '~-~1f467.' },
+  { n: 8205n, c: '~-~200d.' },
+  { n: 128102n, c: '~-~1f466.' },
+  { n: 97n, c: '~-a' },
+  { n: 33n, c: '~-~21.' },
+  { n: 32n, c: '~-.' },
+  { n: 126n, c: '~-~~' },
+  { n: 46n, c: '~-~.' },
+  { n: 1548n, c: '~-~60c.' },
+  //  the cases below are deranged, because the input is deranged.
+  //  @c represents utf-32 codepoints, so if you give it not-utf-32
+  //  it will render bogus, drop bytes in the rendering, etc.
+  //  we include them (disabled) here to indicate that we don't have 100%
+  //  exact stdlib parity here, but in practice that shouldn't matter.
+  // { n: 478560413032n, c: '~-~c6568.o' },  //  'hello'
+  // { n: 36762444129640n, c: '~-~c6568.~216f.' }  //  'hello!'
+];
+testAuras('chars', CHAR_AURAS, CHAR_TESTS);
+
 describe('blob parsing', () => {
   it('parses', () => {
     expect(nuck('~02')).toEqual({ type: 'blob', jam: 2n });

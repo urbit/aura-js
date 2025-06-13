@@ -214,8 +214,12 @@ export function nuck(str: string): coin | null {
         return { type: 'dime', aura: 't', atom: stringToCord(decodeString(str.slice(2))) };
       } else
       if (str[1] === '-' && regex['c'].test(str)) {
-        //TODO  known-wrong! extract encoded byte-sequences and call +taft
-        //      ...or just extract as single utf-32 character?
+        //TODO  cheeky! this doesn't support the full range of inputs that the
+        //      hoon stdlib supports, but should work for all sane inputs.
+        //      no guarantees about behavior for insane inputs...
+        if (/^~\-~[0-9a-f]+\.$/.test(str)) {
+          return { type: 'dime', aura: 'c', atom: BigInt('0x' + str.slice(3, -1)) };
+        }
         return { type: 'dime', aura: 'c', atom: stringToCord(decodeString(str.slice(2))) };
       }
     }
