@@ -39,10 +39,11 @@ export type coin = ({ type: 'dime' } & dime)
                  | { type: 'blob', jam: bigint }  //NOTE  nockjs for full noun
                  | { type: 'many', list: coin[] }
 
-//TODO  for deduplicating @u vs @s
-// function integerRegex(a: string, b: string, c: string, d: boolean = false): RegExp {
-//   return new RegExp(`^${d ? '\\-\\-?' : ''}xx$`);
-// }
+function integerRegex(a: string, b: string, c: string, d: number, e: boolean = false): RegExp {
+  const pre = d === 0 ? b       : `${b}${c}{0,${d-1}}`;
+  const aft = d === 0 ? `${c}*` : `(\\.${c}{${d}})*`;
+  return new RegExp(`^${e ? '\\-\\-?' : ''}${a}(0|${pre}${aft})$`);
+}
 
 //TODO  rewrite with eye towards capturing groups?
 export const regex: { [key in aura]: RegExp } = {
@@ -53,21 +54,21 @@ export const regex: { [key in aura]: RegExp } = {
   'n':   /^~$/,
   'p':   /^~([a-z]{3}|([a-z]{6}(\-[a-z]{6}){0,3}(\-(\-[a-z]{6}){4})*))$/,  //NOTE  matches shape but not syllables
   'q':   /^\.~(([a-z]{3}|[a-z]{6})(\-[a-z]{6})*)$/,  //NOTE  matches shape but not syllables
-  'sb':  /^\-\-?0b(0|1[01]{0,3}(\.[01]{4})*)$/,
-  'sd':  /^\-\-?(0|[1-9][0-9]{0,3}(\.[0-9]{4})*)$/,
-  'si':  /^\-\-?0i(0|[1-9][0-9]*)$/,
-  'sv':  /^\-\-?0v(0|[1-9a-v][0-9a-v]{0,4}(\.[0-9a-v]{5})*)$/,
-  'sw':  /^\-\-?0w(0|[1-9a-zA-Z~-][0-9a-zA-Z~-]{0,4}(\.[0-9a-zA-Z~-]{5})*)$/,
-  'sx':  /^\-\-?0x(0|[1-9a-f][0-9a-f]{0,3}(\.[0-9a-f]{4})*)$/,
+  'sb':  integerRegex('0b', '1', '[01]', 4, true),
+  'sd':  integerRegex('', '[1-9]', '[0-9]', 3, true),
+  'si':  integerRegex('0i', '[1-9]', '[0-9]', 0, true),
+  'sv':  integerRegex('0v', '[1-9a-v]', '[0-9a-v]', 5, true),
+  'sw':  integerRegex('0w', '[1-9a-zA-Z~-]', '[0-9a-zA-Z~-]', 5, true),
+  'sx':  integerRegex('0x', '[1-9a-f]', '[0-9a-f]', 4, true),
   't':   /^~~((~[0-9a-fA-F]+\.)|(~[~\.])|[0-9a-z\-\._])*$/,
   'ta':  /^~\.[0-9a-z\-\.~_]*$/,
   'tas': /^[a-z][a-z0-9\-]*$/,
-  'ub':  /^0b(0|1[01]{0,3}(\.[01]{4})*)$/,
-  'ud':  /^(0|[1-9][0-9]{0,2}(\.[0-9]{3})*)$/,
-  'ui':  /^0i(0|[1-9][0-9]*)$/,
-  'uv':  /^0v(0|[1-9a-v][0-9a-v]{0,4}(\.[0-9a-v]{5})*)$/,
-  'uw':  /^0w(0|[1-9a-zA-Z~-][0-9a-zA-Z~-]{0,4}(\.[0-9a-zA-Z~-]{5})*)$/,
-  'ux':  /^0x(0|[1-9a-f][0-9a-f]{0,3}(\.[0-9a-f]{4})*)$/,
+  'ub':  integerRegex('0b', '1', '[01]', 4),
+  'ud':  integerRegex('', '[1-9]', '[0-9]', 3),
+  'ui':  integerRegex('0i', '[1-9]', '[0-9]', 0),
+  'uv':  integerRegex('0v', '[1-9a-v]', '[0-9a-v]', 5),
+  'uw':  integerRegex('0w', '[1-9a-zA-Z~-]', '[0-9a-zA-Z~-]', 5),
+  'ux':  integerRegex('0x', '[1-9a-f]', '[0-9a-f]', 4),
 };
 
 //  parse(): slaw()

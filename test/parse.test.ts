@@ -1,4 +1,4 @@
-import { parse, aura, decodeString, nuck } from '../src/parse';
+import { parse, aura, decodeString, nuck, regex } from '../src/parse';
 
 //  most test cases generated from snippets similar to the following:
 //
@@ -41,10 +41,13 @@ function testAuras(desc: string, auras: aura[], tests: { n: bigint }[]) {
       describe(`@${a} parsing`, () => {
         tests.map((test) => {
           // @ts-ignore we know this is sane/safe
-          describe(test[a], () => {
+          const str = test[a];
+          describe(str, () => {
+            it('matches regex', () => {
+              expect(regex[a].test(str)).toEqual(true);
+            });
             it('parses', () => {
-              // @ts-ignore we know this is sane/safe
-              const res = parse(a, test[a]);
+              const res = parse(a, str);
               expect(res).toEqual(test.n);
             });
           });
