@@ -37,7 +37,7 @@ export type aura = 'c'
                  | 'ux';
 export type dime = { aura: aura, atom: bigint }
 export type coin = ({ type: 'dime' } & dime)
-                 | { type: 'blob', noun: any }  //TODO  could do jam: bigint if we don't want nockjs dependency?
+                 | { type: 'blob', jam: bigint }  //NOTE  nockjs for full noun
                  | { type: 'many', list: coin[] }
 
 //  render(): scot()
@@ -52,13 +52,12 @@ export function scot(aura: aura, atom: bigint): string {
 export function rend(coin: coin): string {
   switch (coin.type) {
     case 'blob':
-      throw new Error('aura-js: %blob rendering unsupported'); //TODO
+      return '~0' + coin.jam.toString(32);
 
     case 'many':
       return '.' + coin.list.reduce((acc: string, item: coin) => {
         return acc + '_' + wack(rend(item));
       }, '') + '__';
-      throw new Error('aura-js: %many rendering unsupported'); //TODO
 
     case 'dime':
       switch(coin.aura[0]) {

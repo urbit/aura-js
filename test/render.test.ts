@@ -523,5 +523,9 @@ describe('%many coin rendering', () => {
   });
 });
 
-//TODO  render->parse roundtrip tests
-
+describe('blob rendering', () => {
+  it('parses', () => {
+    expect(rend({ type: 'blob', jam: 2n })).toEqual('~02');
+    expect(rend({ type: 'blob', jam: 325350265702017n })).toEqual('~097su1g7hk1');
+  });
+});
