@@ -1,4 +1,4 @@
-import { parse, aura, decodeString } from '../src/parse';
+import { parse, aura, decodeString, nuck } from '../src/parse';
 
 //  most test cases generated from snippets similar to the following:
 //
@@ -343,3 +343,44 @@ const TEXT_TESTS: {
     }
   ];
 testAuras('text', TEXT_AURAS, TEXT_TESTS);
+
+describe('blob parsing', () => {
+  it('parses', () => {
+    expect(nuck('~02')).toEqual({ type: 'blob', jam: 2n });
+    expect(nuck('~097su1g7hk1')).toEqual({ type: 'blob', jam: 325350265702017n });
+  });
+});
+
+describe('many parsing', () => {
+  it('parses', () => {
+    expect(nuck('.__')).toEqual({ type: 'many', list: [] });
+    expect(
+      nuck('._123__')
+    ).toEqual(
+      { type: 'many', list: [ { type: 'dime', aura: 'ud', atom: 123n }, ] }
+    );
+    expect(
+      nuck('._~~~~a~~42.c_123_~~01hu32s3gu1_.~-1~-2~-~-__')
+    ).toEqual({ type: 'many', list: [
+      { type: 'dime', aura: 't', atom: 6505057n },
+      { type: 'dime', aura: 'ud', atom: 123n },
+      { type: 'blob', jam: 54910179722177n },
+      { type: 'many', list: [
+        { type: 'dime', aura: 'ud', atom: 1n },
+        { type: 'dime', aura: 'ud', atom: 2n }
+      ] }
+    ] });
+  });
+});
+
+describe('invalid syntax', () => {
+  it('fails incomplete atoms', () => {
+    expect(nuck('~0')).toEqual(null);
+    expect(nuck('~2000.1')).toEqual(null);
+  });
+  it('fails unescaped characters', () =>{
+    expect(nuck('~.aBc')).toEqual(null);
+    expect(nuck('._~zod__')).toEqual(null);
+    expect(nuck('.123__')).toEqual(null);
+  });
+});

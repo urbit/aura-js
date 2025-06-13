@@ -5,7 +5,6 @@
 //
 
 //TODO  unsupported auras: @r*, @if, @is
-//TODO  unsupported coins: %blob, %many
 
 import { parseDa } from "./da";
 import { isValidPatp, patp2bn } from "./p";
@@ -37,7 +36,7 @@ export type aura = 'c'
                  | 'ux';
 export type dime = { aura: aura, atom: bigint }
 export type coin = ({ type: 'dime' } & dime)
-                 | { type: 'blob', noun: any }  //TODO  could do jam: bigint if we don't want nockjs dependency?
+                 | { type: 'blob', jam: bigint }  //NOTE  nockjs for full noun
                  | { type: 'many', list: coin[] }
 
 //TODO  for deduplicating @u vs @s
@@ -169,9 +168,21 @@ export function nuck(str: string): coin | null {
       } else {
         return { type: 'dime', aura: 'q', atom: patq2bn(q) }
       }
-    }
+    } else
     //TODO  %is, %if, %r*  //  "zust"
-    //TODO  nusk for %many support
+    if (str[1] === '_' && /^\.(_([0-9a-zA-Z\-\.]|~\-|~~)+)*__$/.test(str)) {  //  "nusk"
+      const coins = str.slice(1, -2).split('_').slice(1).map((s): coin | null => {
+        //NOTE  real +wick produces null for strings w/ other ~ chars,
+        //      but the regex above already excludes those
+        s = s.replaceAll('~-', '_').replaceAll('~~', '~');  //  "wick"
+        return nuck(s);
+      });
+      if (coins.some(c => c === null)) {
+        return null;
+      } else {
+        return { type: 'many', list: coins as coin[] };
+      }
+    }
     return null;
   } else
   if (c === '~') {
@@ -207,7 +218,9 @@ export function nuck(str: string): coin | null {
         return { type: 'dime', aura: 'c', atom: stringToCord(decodeString(str.slice(2))) };
       }
     }
-    //TODO  twid for %blob support
+    if ((str[1] === '0') && /^~0[0-9a-v]+$/.test(str)) {
+      return { type: 'blob', jam: parseUv('0v' + str.slice(2)) };
+    }
     return null;
   }
   return null;
