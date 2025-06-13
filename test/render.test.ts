@@ -1,4 +1,5 @@
-import { render, aura, coin, rend } from '../src/render';
+import { aura, coin } from '../src/types';
+import { render, rend } from '../src/render';
 
 //  most test cases generated from snippets similar to the following:
 //

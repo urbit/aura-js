@@ -1,4 +1,5 @@
-import { parse, aura, decodeString, nuck, regex } from '../src/parse';
+import { aura } from '../src/types';
+import { parse, decodeString, nuck, regex } from '../src/parse';
 
 //  most test cases generated from snippets similar to the following:
 //

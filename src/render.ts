@@ -4,41 +4,14 @@
 //    stdlib arm names are included for ease of cross-referencing.
 //
 
+import { aura, coin } from './types';
+
 import { formatDa } from "./da";
 import { patp } from "./p";
 import { patq } from "./q";
 import { formatUw } from "./uw";
 
 //TODO  unsupported auras: @r*, @if, @is
-//TODO  unsupported coins: %blob, %many
-
-//TODO  dedupe with parse
-export type aura = 'c'
-                 | 'da'
-                 | 'dr'
-                 | 'f'
-                 | 'n'
-                 | 'p'
-                 | 'q'
-                 | 'sb'
-                 | 'sd'
-                 | 'si'
-                 | 'sv'
-                 | 'sw'
-                 | 'sx'
-                 | 't'
-                 | 'ta'
-                 | 'tas'
-                 | 'ub'
-                 | 'ud'
-                 | 'ui'
-                 | 'uv'
-                 | 'uw'
-                 | 'ux';
-export type dime = { aura: aura, atom: bigint }
-export type coin = ({ type: 'dime' } & dime)
-                 | { type: 'blob', jam: bigint }  //NOTE  nockjs for full noun
-                 | { type: 'many', list: coin[] }
 
 //  render(): scot()
 //  scot(): render atom as specific aura

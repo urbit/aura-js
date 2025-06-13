@@ -4,7 +4,7 @@
 //    stdlib arm names are included for ease of cross-referencing.
 //
 
-//TODO  unsupported auras: @r*, @if, @is
+import { aura, dime, coin } from './types';
 
 import { parseDa } from "./da";
 import { isValidPatp, patp2bn } from "./p";
@@ -12,32 +12,7 @@ import { isValidPatq, patq2bn } from "./q";
 import { parseUv } from "./uv";
 import { parseUw } from "./uw";
 
-export type aura = 'c'
-                 | 'da'
-                 | 'dr'
-                 | 'f'
-                 | 'n'
-                 | 'p'
-                 | 'q'
-                 | 'sb'
-                 | 'sd'
-                 | 'si'
-                 | 'sv'
-                 | 'sw'
-                 | 'sx'
-                 | 't'
-                 | 'ta'
-                 | 'tas'
-                 | 'ub'
-                 | 'ud'
-                 | 'ui'
-                 | 'uv'
-                 | 'uw'
-                 | 'ux';
-export type dime = { aura: aura, atom: bigint }
-export type coin = ({ type: 'dime' } & dime)
-                 | { type: 'blob', jam: bigint }  //NOTE  nockjs for full noun
-                 | { type: 'many', list: coin[] }
+//TODO  unsupported auras: @r*, @if, @is
 
 function integerRegex(a: string, b: string, c: string, d: number, e: boolean = false): RegExp {
   const pre = d === 0 ? b       : `${b}${c}{0,${d-1}}`;

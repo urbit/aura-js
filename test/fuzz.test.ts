@@ -1,4 +1,5 @@
-import parse, { aura } from "../src/parse";
+import { aura } from '../src/types';
+import parse from "../src/parse";
 import render from "../src/render";
 
 const testCount = 500;
