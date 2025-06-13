@@ -1,18 +1,17 @@
-//  parse: parse atom literals
+//  parse: deserialize from atom literal strings
 //
 //    atom literal parsing from hoon 137 (and earlier).
 //    stdlib arm names are included for ease of cross-referencing.
 //
+//TODO  unsupported auras: @r*, @if, @is
 
 import { aura, dime, coin } from './types';
 
-import { parseDa } from "./da";
-import { isValidPatp, patp2bn } from "./p";
-import { isValidPatq, patq2bn } from "./q";
-import { parseUv } from "./uv";
-import { parseUw } from "./uw";
-
-//TODO  unsupported auras: @r*, @if, @is
+import { parseDa } from './da';
+import { isValidPatp, patp2bn } from './p';
+import { isValidPatq, patq2bn } from './q';
+import { parseUv } from './uv';
+import { parseUw } from './uw';
 
 function integerRegex(a: string, b: string, c: string, d: number, e: boolean = false): RegExp {
   const pre = d === 0 ? b       : `${b}${c}{0,${d-1}}`;
@@ -219,7 +218,7 @@ export function bisk(str: string): dime | null {
 
     case '0c':  //  "fim"
       //TODO  support base58
-      console.log('aura-js: @uc unsupported (bisk)');
+      console.log('aura-js: @uc parsing unsupported (bisk)');
       return null;
 
     case '0i':  //  "dim"

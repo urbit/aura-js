@@ -3,15 +3,13 @@
 //    atom literal rendering from hoon 137 (and earlier).
 //    stdlib arm names are included for ease of cross-referencing.
 //
+//TODO  unsupported auras: @r*, @if, @is
 
 import { aura, coin } from './types';
 
-import { formatDa } from "./da";
-import { patp } from "./p";
-import { patq } from "./q";
-import { formatUw } from "./uw";
-
-//TODO  unsupported auras: @r*, @if, @is
+import { formatDa } from './da';
+import { patp } from './p';
+import { patq } from './q';
 
 //  render(): scot()
 //  scot(): render atom as specific aura
@@ -22,6 +20,8 @@ export function scot(aura: aura, atom: bigint): string {
   return rend({ type: 'dime', aura, atom });
 }
 
+//  rend(): render coin into string
+//
 export function rend(coin: coin): string {
   switch (coin.type) {
     case 'blob':
@@ -109,24 +109,12 @@ export function rend(coin: coin): string {
   }
 }
 
-function aco(atom: bigint): string {
-  return dco(1, atom);
-}
-
 function dco(lent: number, atom: bigint): string {
   return atom.toString(10).padStart(lent, '0');
 }
 
-function vco(lent: number, atom: bigint): string {
-  return atom.toString(32).padStart(lent, '0');
-}
-
 function xco(lent: number, atom: bigint): string {
   return atom.toString(16).padStart(lent, '0');
-}
-
-function yco(atom: bigint): string {
-  return dco(2, atom);
 }
 
 function zco(atom: bigint): string {
