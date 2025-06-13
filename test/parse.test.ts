@@ -124,6 +124,11 @@ describe('many parsing', () => {
 });
 
 describe('invalid syntax', () => {
+  it('fails leading zeroes', () => {
+    expect(nuck('00')).toEqual(null);
+    expect(nuck('01')).toEqual(null);
+    expect(nuck('0b01')).toEqual(null);
+  });
   it('fails incomplete atoms', () => {
     expect(nuck('~0')).toEqual(null);
     expect(nuck('~2000.1')).toEqual(null);
@@ -132,5 +137,9 @@ describe('invalid syntax', () => {
     expect(nuck('~.aBc')).toEqual(null);
     expect(nuck('._~zod__')).toEqual(null);
     expect(nuck('.123__')).toEqual(null);
+  });
+  it('fails bogus dates', () => {
+    expect(nuck('~2025.1.0')).toEqual(null);
+    expect(nuck('~2025.13.1')).toEqual(null);
   });
 });
