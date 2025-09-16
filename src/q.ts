@@ -1,6 +1,9 @@
 import { isValidPat, prefixes, suffixes } from './hoon';
 import { chunk, splitAt } from './utils';
 
+//NOTE  the logic in this file has not yet been updated for the latest broader
+//      aura-js implementation style. but We Make It Work™.
+
 //TODO  investigate whether native UintArrays are more portable
 //      than node Buffers
 
@@ -74,9 +77,6 @@ export function hex2patq(arg: string): string {
  * @return  {String}
  */
 export function patq2hex(name: string): string {
-  if (isValidPat(name) === false) {
-    throw new Error('patq2hex: not a valid @q');
-  }
   const chunks = name.slice(1).split('-');
   const dec2hex = (dec: number) => dec.toString(16).padStart(2, '0');
 
@@ -121,7 +121,7 @@ export function patq2dec(name: string): string {
  * @return  {boolean}
  */
 export const isValidPatq = (str: string): boolean =>
-  isValidPat(str) && eqPatq(str, patq(patq2dec(str)));
+  eqPatq(str, patq(patq2dec(str)));
 
 /**
  * Remove all leading zero bytes from a sliceable value.

@@ -9,6 +9,9 @@ import {
 } from './hoon';
 import ob from './hoon/ob';
 
+//NOTE  the logic in this file has not yet been updated for the latest broader
+//      aura-js implementation style. but We Make It Work™.
+
 /**
  * Convert a hex-encoded string to a @p-encoded string.
  *

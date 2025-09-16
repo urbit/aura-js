@@ -142,4 +142,14 @@ describe('invalid syntax', () => {
     expect(nuck('~2025.1.0')).toEqual(null);
     expect(nuck('~2025.13.1')).toEqual(null);
   });
+  it('fails bogus @p or @q', () => {
+    expect(nuck('~zad')).toEqual(null);
+    expect(nuck('.~zad')).toEqual(null);
+    expect(nuck('~zodbin')).toEqual(null);
+    expect(nuck('.~zodbin')).toEqual(null);
+    expect(nuck('~funpal')).toEqual(null);
+    expect(nuck('.~funpal')).toEqual(null);
+    expect(nuck('~mister--dister')).toEqual(null);
+    expect(nuck('.~mister--dister')).toEqual(null);
+  })
 });

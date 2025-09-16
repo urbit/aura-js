@@ -135,11 +135,15 @@ export function nuck(str: string): coin | null {
       //        should probably run some perf tests
     if (str[1] === '~' && regex['q'].test(str)) {
       const q = str.slice(1);  //NOTE  q.ts insanity, need to strip leading .
-      if (!isValidPatq(q)) {
-        console.log('invalid @q', q);
+      try {
+        if (!isValidPatq(q)) {
+          console.log('invalid @q', q);
+          return null;
+        } else {
+          return { type: 'dime', aura: 'q', atom: patq2bn(q) }
+        }
+      } catch(e) {
         return null;
-      } else {
-        return { type: 'dime', aura: 'q', atom: patq2bn(q) }
       }
     } else
     //TODO  %is, %if, %r*  //  "zust"
