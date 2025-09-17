@@ -43,11 +43,21 @@ export const regex: { [key in aura]: RegExp } = {
   'ux':  integerRegex('0x', '[1-9a-f]', '[0-9a-f]', 4),
 };
 
-//  parse(): slaw()
+//  parse(): slav()
+//  slav(): slaw() but throwing on failure
+//
+export const parse = slav;
+export default parse;
+export function slav(aura: aura, str: string): bigint {
+  const out = slaw(aura, str);
+  if (!out) {
+    throw new Error('slav: failed to parse @' + aura + ' from string: ' + str);
+  }
+  return out;
+}
+
 //  slaw(): parse string as specific aura, null if that fails
 //
-export const parse = slaw;
-export default parse;
 export function slaw(aura: aura, str: string): bigint | null {
   //  if the aura has a regex, test with that first
   //TODO  does double work with checks in nuck?
@@ -65,16 +75,6 @@ export function slaw(aura: aura, str: string): bigint | null {
   } else {
     return null;
   }
-}
-
-//  slav(): slaw() but throwing on failure
-//
-export function slav(aura: aura, str: string): bigint {
-  const out = slaw(aura, str);
-  if (!out) {
-    throw new Error('slav: failed to parse @' + aura + ' from string: ' + str);
-  }
-  return out;
 }
 
 //  nuck(): parse string into coin, or null if that fails
@@ -209,7 +209,7 @@ export function nuck(str: string): coin | null {
 
 //  bisk(): parse string into dime of integer aura, or null if that fails
 //
-export function bisk(str: string): dime | null {
+function bisk(str: string): dime | null {
   switch (str.slice(0, 2)) {
     case '0b':  //  "bay"
       if (regex['ub'].test(str)) {
