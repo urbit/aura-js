@@ -56,8 +56,10 @@ export function slav(aura: aura, str: string): bigint {
   return out;
 }
 
+//  tryParse(): slaw()
 //  slaw(): parse string as specific aura, null if that fails
 //
+export const tryParse = slaw;
 export function slaw(aura: aura, str: string): bigint | null {
   //  if the aura has a regex, test with that first
   //TODO  does double work with checks in nuck?

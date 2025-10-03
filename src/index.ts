@@ -1,6 +1,6 @@
 //  main
 export * from './types';
-export { parse, slaw, slav, nuck } from './parse';
+export { parse, tryParse, slav, slaw, nuck } from './parse';
 export { render, scot, rend } from './render';  //TODO  expose encodeString() ?
 
 //  atom utils
