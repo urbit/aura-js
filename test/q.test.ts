@@ -48,8 +48,6 @@ describe('patq, etc.', () => {
     expect(input).toThrow();
     input = () => patq2hex('~nidsut-tomdzn');
     expect(input).toThrow();
-    input = () => patq2hex('~sut-tomdun');
-    expect(input).toThrow();
     input = () => patq2hex('~nidsut-dun');
     expect(input).toThrow();
     input = () => patq2hex(null as any);

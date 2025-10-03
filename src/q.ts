@@ -78,11 +78,14 @@ export function hex2patq(arg: string): string {
  */
 export function patq2hex(name: string): string {
   const chunks = name.slice(1).split('-');
-  const dec2hex = (dec: number) => dec.toString(16).padStart(2, '0');
+  const dec2hex = (dec: number) => {
+    if (dec < 0) throw new Error('malformed @q');
+    return dec.toString(16).padStart(2, '0');
+  }
 
-  const splat = chunks.map((chunk) => {
+  const splat = chunks.map((chunk, i) => {
     let syls = splitAt(3, chunk);
-    return syls[1] === ''
+    return (syls[1] === '' && i === 0)  //  singles only at the start
       ? dec2hex(suffixes.indexOf(syls[0]))
       : dec2hex(prefixes.indexOf(syls[0])) + dec2hex(suffixes.indexOf(syls[1]));
   });
@@ -120,8 +123,10 @@ export function patq2dec(name: string): string {
  * @param  {String}  str a string
  * @return  {boolean}
  */
-export const isValidPatq = (str: string): boolean =>
-  eqPatq(str, patq(patq2dec(str)));
+export const isValidPatq = (str: string): boolean => {
+  if (str === '') return false;
+  try { return eqPatq(str, patq(patq2dec(str))); } catch (e) { return false; }
+};
 
 /**
  * Remove all leading zero bytes from a sliceable value.

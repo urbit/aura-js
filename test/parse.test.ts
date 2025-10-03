@@ -149,6 +149,8 @@ describe('invalid syntax', () => {
     expect(nuck('.~zodbin')).toEqual(null);
     expect(nuck('~funpal')).toEqual(null);
     expect(nuck('.~funpal')).toEqual(null);
+    expect(nuck('~nidsut-dun')).toEqual(null);
+    expect(nuck('.~nidsut-dun')).toEqual(null);
     expect(nuck('~mister--dister')).toEqual(null);
     expect(nuck('.~mister--dister')).toEqual(null);
   })
