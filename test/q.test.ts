@@ -6,7 +6,7 @@ import {
   patq2dec,
   eqPatq,
   isValidPatq,
-} from '../src';
+} from '../src/q';
 
 const patqs = jsc.uint32.smap(
   (num) => patq(num),

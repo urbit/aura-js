@@ -1,5 +1,5 @@
 import { aura } from '../src/types';
-import { parse, decodeString, nuck, regex } from '../src/parse';
+import { tryParse as parse, decodeString, nuck, regex } from '../src/parse';
 import { INTEGER_AURAS, INTEGER_TESTS,
          PHONETIC_AURAS, PHONETIC_TESTS,
          DATE_AURAS, DATE_TESTS,

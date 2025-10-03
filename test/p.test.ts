@@ -10,7 +10,7 @@ import {
   preSig,
   deSig,
   cite,
-} from '../src';
+} from '../src/p';
 
 const patps = jsc.uint32.smap(
   (num) => patp(num),
