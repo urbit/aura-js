@@ -79,6 +79,10 @@ export function slaw(aura: aura, str: string): bigint | null {
   }
 }
 
+export function valid(aura: aura, str: string): boolean {
+  return slaw(aura, str) !== null;
+}
+
 //  nuck(): parse string into coin, or null if that fails
 //
 export function nuck(str: string): coin | null {
