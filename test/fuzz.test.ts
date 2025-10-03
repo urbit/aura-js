@@ -1,6 +1,7 @@
 import { aura } from '../src/types';
 import { tryParse as parse } from "../src/parse";
-import render from "../src/render";
+import render from '../src/render';
+import { webcrypto } from 'crypto';
 
 const testCount = 500;
 
@@ -30,7 +31,7 @@ const auras: aura[] = [
 ]
 
 function fuzz(nom: string, arr: Uint8Array | Uint16Array | Uint32Array | BigUint64Array) {
-  crypto.getRandomValues(arr);
+  webcrypto.getRandomValues(arr);
   auras.forEach((a) => {
     describe(nom + ' @' + a, () => {
       it('round-trips losslessly', () => {
