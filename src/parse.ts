@@ -88,7 +88,7 @@ export function valid(aura: aura, str: string): boolean {
 export function nuck(str: string): coin | null {
   if (str === '') return null;
 
-  //  narrow options down by the first character, before doing regex texts
+  //  narrow options down by the first character, before doing regex tests
   //  and trying to parse for real
   //
   const c = str[0];
@@ -136,9 +136,10 @@ export function nuck(str: string): coin | null {
     if (str === '.n') {
       return { type: 'dime', aura: 'f', atom: 1n };
     } else
-      //REVIEW  entering the branch this way assumes regexes for sequentially-tested auras don't overlap...
-      //        going down the list of options this way matches hoon parser behavior the closest, but is slow for the "miss" case.
-      //        should probably run some perf tests
+    //REVIEW  entering the branch this way assumes regexes for sequentially-tested auras don't overlap...
+    //        going down the list of options this way matches hoon parser behavior the closest, but is slow for the "miss" case.
+    //        could be optimized by hard-returning if the regex fails for cases where the lead char is unique.
+    //        should probably run some perf tests
     if (str[1] === '~' && regex['q'].test(str)) {
       const q = str.slice(1);  //NOTE  q.ts insanity, need to strip leading .
       try {
