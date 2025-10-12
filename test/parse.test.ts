@@ -1,6 +1,7 @@
 import { aura } from '../src/types';
 import { tryParse as parse, decodeString, nuck, regex } from '../src/parse';
 import { INTEGER_AURAS, INTEGER_TESTS,
+         FLOAT_16_TESTS, FLOAT_32_TESTS, FLOAT_64_TESTS, FLOAT_128_TESTS,
          PHONETIC_AURAS, PHONETIC_TESTS,
          DATE_AURAS, DATE_TESTS,
          TEXT_AURAS, TEXT_TESTS,
@@ -81,6 +82,10 @@ const OUR_DATE_TESTS: {
 ];
 
 testAuras('integer', INTEGER_AURAS, INTEGER_TESTS);
+testAuras('float16',  ['rh'], FLOAT_16_TESTS);
+testAuras('float32',  ['rs'], FLOAT_32_TESTS);
+testAuras('float64',  ['rd'], FLOAT_64_TESTS);
+testAuras('float128', ['rq'], FLOAT_128_TESTS);
 testAuras('phonetic', PHONETIC_AURAS, PHONETIC_TESTS);
 testAuras('date', DATE_AURAS, OUR_DATE_TESTS);
 testAuras('text', [ 't' ], TEXT_TESTS);
@@ -155,3 +160,5 @@ describe('invalid syntax', () => {
     expect(nuck('.~mister--dister')).toEqual(null);
   })
 });
+
+//TODO  oversized floats

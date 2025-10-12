@@ -10,6 +10,7 @@ import { aura, coin } from './types';
 import { formatDa } from './da';
 import { patp } from './p';
 import { patq } from './q';
+import { render as renderR } from './r';
 
 //  render(): scot()
 //  scot(): render atom as specific aura
@@ -72,10 +73,10 @@ export function rend(coin: coin): string {
           return '.' + patq(coin.atom);
         case 'r':
           switch(coin.aura[1]) {
-            case 'd': throw new Error('aura-js: @rd rendering unsupported'); //TODO
-            case 'h': throw new Error('aura-js: @rh rendering unsupported'); //TODO
-            case 'q': throw new Error('aura-js: @rq rendering unsupported'); //TODO
-            case 's': throw new Error('aura-js: @rs rendering unsupported'); //TODO
+            case 'd': return renderR('d', coin.atom);
+            case 'h': return renderR('h', coin.atom);
+            case 'q': return renderR('q', coin.atom);
+            case 's': return renderR('s', coin.atom);
             default: return zco(coin.atom);
           }
         case 'u':

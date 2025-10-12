@@ -10,11 +10,16 @@ import { aura, dime, coin } from './types';
 import { parseDa } from './da';
 import { isValidPatp, patp2bn } from './p';
 import { isValidPatq, patq2bn } from './q';
+import { parse as parseR, precision } from './r';
 
 function integerRegex(a: string, b: string, c: string, d: number, e: boolean = false): RegExp {
   const pre = d === 0 ? b       : `${b}${c}{0,${d-1}}`;
   const aft = d === 0 ? `${c}*` : `(\\.${c}{${d}})*`;
   return new RegExp(`^${e ? '\\-\\-?' : ''}${a}(0|${pre}${aft})$`);
+}
+
+function floatRegex(a: number): RegExp {
+  return new RegExp(`^\\.~{${a}}(nan|\\-?(inf|(0|[1-9][0-9]*)(\\.[0-9]+)?(e\\-?(0|[1-9][0-9]*))?))$`);
 }
 
 //TODO  rewrite with eye towards capturing groups?
@@ -26,6 +31,10 @@ export const regex: { [key in aura]: RegExp } = {
   'n':   /^~$/,
   'p':   /^~([a-z]{3}|([a-z]{6}(\-[a-z]{6}){0,3}(\-(\-[a-z]{6}){4})*))$/,  //NOTE  matches shape but not syllables
   'q':   /^\.~(([a-z]{3}|[a-z]{6})(\-[a-z]{6})*)$/,  //NOTE  matches shape but not syllables
+  'rd':  floatRegex(1),
+  'rh':  floatRegex(2),
+  'rq':  floatRegex(3),
+  'rs':  floatRegex(0),
   'sb':  integerRegex('0b', '1', '[01]', 4, true),
   'sd':  integerRegex('', '[1-9]', '[0-9]', 3, true),
   'si':  integerRegex('0i', '[1-9]', '[0-9]', 0, true),
@@ -129,7 +138,8 @@ export function nuck(str: string): coin | null {
       return null;
     }
   } else
-  if (c === '.') {  //  "perd"
+  if (c === '.') {  //  "perd", "zust"
+    //NOTE  doesn't match stdlib parsing order, but they're easy early-outs
     if (str === '.y') {
       return { type: 'dime', aura: 'f', atom: 0n };
     } else
@@ -140,6 +150,23 @@ export function nuck(str: string): coin | null {
     //        going down the list of options this way matches hoon parser behavior the closest, but is slow for the "miss" case.
     //        could be optimized by hard-returning if the regex fails for cases where the lead char is unique.
     //        should probably run some perf tests
+    if ( ( str[1] === '~' &&
+           (regex['rd'].test(str) || regex['rh'].test(str) || regex['rq'].test(str)) )
+      || regex['rs'].test(str) ) {  //  "royl"
+      let precision = 0, i = 1;
+      while (str[i] === '~') {
+        precision++; i++;
+      }
+      let aura: aura;
+      switch (precision) {
+        case 0: aura = 'rs'; break;
+        case 1: aura = 'rd'; break;
+        case 2: aura = 'rh'; break;
+        case 3: aura = 'rq'; break;
+        default: throw new Error('parsing invalid @r*');
+      }
+      return { type: 'dime', aura, atom: parseR(aura[1] as precision, str) };
+    } else
     if (str[1] === '~' && regex['q'].test(str)) {
       const q = str.slice(1);  //NOTE  q.ts insanity, need to strip leading .
       try {
@@ -153,7 +180,7 @@ export function nuck(str: string): coin | null {
         return null;
       }
     } else
-    //TODO  %is, %if, %r*  //  "zust"
+    //TODO  %is, %if  //  "zust"
     if (str[1] === '_' && /^\.(_([0-9a-zA-Z\-\.]|~\-|~~)+)*__$/.test(str)) {  //  "nusk"
       const coins = str.slice(1, -2).split('_').slice(1).map((s): coin | null => {
         //NOTE  real +wick produces null for strings w/ other ~ chars,

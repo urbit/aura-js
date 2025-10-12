@@ -1,6 +1,7 @@
 import { aura, coin } from '../src/types';
 import { render, rend } from '../src/render';
 import { INTEGER_AURAS, INTEGER_TESTS,
+         FLOAT_16_TESTS, FLOAT_32_TESTS, FLOAT_64_TESTS, FLOAT_128_TESTS,
          PHONETIC_AURAS, PHONETIC_TESTS,
          DATE_AURAS, DATE_TESTS,
          TEXT_AURAS, TEXT_TESTS,
@@ -48,6 +49,10 @@ function testAuras(desc: string, auras: aura[], tests: { n: bigint }[]) {
 }
 
 testAuras('integer', INTEGER_AURAS, INTEGER_TESTS);
+testAuras('float16',  ['rh'], FLOAT_16_TESTS);
+testAuras('float32',  ['rs'], FLOAT_32_TESTS);
+testAuras('float64',  ['rd'], FLOAT_64_TESTS);
+testAuras('float128', ['rq'], FLOAT_128_TESTS);
 testAuras('phonetic', PHONETIC_AURAS, PHONETIC_TESTS);
 testAuras('date', DATE_AURAS, DATE_TESTS);
 testAuras('text', TEXT_AURAS, TEXT_TESTS);
