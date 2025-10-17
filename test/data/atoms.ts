@@ -493,7 +493,7 @@ export const PHONETIC_TESTS: {
   //  absurdly long
   { 'n': 0x7468697320697320736f6d6520766572792068696768207175616c69747920656e74726f7079n,
     'p': '~divmes-davset-holdet--sallun-salpel-taswet-holtex--watmeb-tarlun-picdet-magmes--holter-dacruc-timdet-divtud--holwet-maldut-padpel-sivtud',
-    'q': '.~divmes-davset-holdet--sallun-salpel-taswet-holtex--watmeb-tarlun-picdet-magmes--holter-dacruc-timdet-divtud--holwet-maldut-padpel-sivtud'
+    'q': '.~divmes-davset-holdet-sallun-salpel-taswet-holtex-watmeb-tarlun-picdet-magmes-holter-dacruc-timdet-divtud-holwet-maldut-padpel-sivtud'
   },
 ];
 
