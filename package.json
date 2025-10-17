@@ -29,7 +29,6 @@
     "@tsconfig/recommended": "^1.0.2",
     "dts-cli": "^2.0.0",
     "husky": "^7.0.4",
-    "jsverify": "^0.8.4",
     "tslib": "^2.5.0",
     "typescript": "^5.0.4"
   },
