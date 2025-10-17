@@ -153,10 +153,8 @@ export function nuck(str: string): coin | null {
     if ( ( str[1] === '~' &&
            (regex['rd'].test(str) || regex['rh'].test(str) || regex['rq'].test(str)) )
       || regex['rs'].test(str) ) {  //  "royl"
-      let precision = 0, i = 1;
-      while (str[i] === '~') {
-        precision++; i++;
-      }
+      let precision = 0;
+      while (str[precision+1] === '~') precision++;
       let aura: aura;
       switch (precision) {
         case 0: aura = 'rs'; break;
