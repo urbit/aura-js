@@ -27,6 +27,7 @@ const auras: aura[] = [
   // 'ta',   //
   // 'tas',  //
   'ub',
+  // 'uc', //TODO  unsupported
   'ud',
   'ui',
   'uv',

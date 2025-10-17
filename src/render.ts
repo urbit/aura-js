@@ -3,7 +3,7 @@
 //    atom literal rendering from hoon 137 (and earlier).
 //    stdlib arm names are included for ease of cross-referencing.
 //
-//TODO  unsupported auras: @dr, @if, @is
+//TODO  unsupported auras: @dr, @if, @is, @uc
 
 import { aura, coin } from './types';
 

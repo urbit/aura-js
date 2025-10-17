@@ -2,7 +2,7 @@
 
 Hoon literal syntax parsing and rendering. Approaching two nines of parity with hoon stdlib.
 
-Supports all standard auras (except `@dr`, `@if` and `@is`).
+Supports all standard auras (except `@dr`, `@if`, `@is` and `@uc`).
 
 ## API overview
 
