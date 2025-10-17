@@ -1,64 +1,50 @@
 # `@urbit/aura`
 
-This NPM package is intended to ease the flow of developing FE applications for urbit, by adding parsing and formatting functions for the various urbit auras
+Hoon literal syntax parsing and rendering. Approaching two nines of parity with hoon stdlib.
 
-## API
+Supports all standard auras (except `@dr`, `@if` and `@is`).
+
+## API overview
+
+Atoms are native `bigint`s. Top-level library functions reflect the hoon stdlib. Aliases are provided for your comfort. Summary of exports below.
+
+### Parsing
 
 ```typescript
-// @da manipulation
-function parseDa(da: string): bigint;
-function formatDa(da: bigint): string;
-// Given a bigint representing an urbit date, returns a unix timestamp.
-function daToUnix(da: bigint): number;
-// Given a unix timestamp, returns a bigint representing an urbit date
-function unixToDa(unix: number): bigint;
+const parse = slav;
+const tryParse = slaw;
+function valid(:aura, :string): boolean;
+function slav(:aura, :string): bigint;  //  throws on failure
+function slaw(:aura, :string): bigint | null;
+function nuck(:string): coin | null;
+```
 
-// @p manipulation
-// Convert a number to a @p-encoded string.
-function patp(arg: string | number | bigint): string;
-function hex2patp(hex: string): string;
-function patp2hex(name: string): string;
-function patp2bn(name: string): bigint;
-function patp2dec(name: string): string;
-// Determine the ship class of a @p value.
-function clan(who: string): string;
-// Determine the parent of a @p value.
-function sein(name: string): strin;
-// Validate a @p string.
-function isValidPatp(str: string): boolean;
-// Ensure @p is sigged.
-function preSig(ship: string): string;
-// Remove sig from @p
-function deSig(ship: string): string;
-// Trim @p to short form
-function cite(ship: string): string | null;
+### Rendering
 
-// @q manipulation
-// Convert a number to a @q-encoded string.
-function patq(arg: string | number | bigint): string;
-function hex2patq(arg: string): string;
-function patq2hex(name: string): string;
-function patq2bn(name: string): bigint;
-function patq2dec(name: string): string;
-// Validate a @q string.
-function isValidPatq(str: string): boolean;
-// Equality comparison on @q values.
-function eqPatq(p: string, q: string): boolean;
+```typescript
+const render = scot;
+function scot(:aura, :bigint): string;
+function rend(:coin): string;
+```
 
-// @ud manipulation
-function parseUd(ud: string): bigint;
-function formatUd(ud: bigint): string;
+### Utilities
 
-// @uv manipulation
-function parseUv(x: string): bigint;
-function formatUv(x: bigint | string): string;
+We provide some utilities for desirable operations on specific auras. These too generally match their hoon stdlib equivalents.
 
-// @uw manipulation
-function parseUw(x: string): bigint;
-function formatUw(x: bigint | string): string;
-
-// @ux manipulation
-function parseUx(ux: string): string;
-function formatUx(hex: string): string;
-``;
+```typescript
+const da = {
+  function toUnix(:bigint): number,
+  function fromUnix(:number): bigint,
+};
+const p = {
+  type rank = 'czar'   | 'king' | 'duke'   | 'earl' | 'pawn',
+  type size = 'galaxy' | 'star' | 'planet' | 'moon' | 'comet',
+  function cite(:bigint | string): string,
+  function sein(:bigint): bigint,
+  function sein(:string): string,  //  throws on bad input
+  function clan(:bigint | string): rank,  //  throws on bad input
+  function kind(:bigint | string): size,  //  throws on bad input
+  function rankToSize(:rank): size,
+  function sizeToRank(:size): rank,
+};
 ```
