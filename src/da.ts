@@ -1,3 +1,84 @@
+/**
+ * Given a string formatted as a `@da`, returns a bigint representing the urbit date.
+ *
+ * @param   {string}  x  The formatted `@da`
+ * @return  {bigint}     The urbit date as bigint
+ */
+export function parseDa(x: string): bigint {
+  let pos = true;
+  let [date, time, ms] = x.split('..');
+  time = time || '0.0.0';
+  ms = ms || '0000';
+  let [yer, month, day] = date.slice(1).split('.');
+  if (yer.at(-1) === '-') {
+    yer = yer.slice(0, -1);
+    pos = false;
+  }
+  const [hour, minute, sec] = time.split('.');
+  const millis = ms.split('.').map((m) => BigInt('0x' + m));
+
+  return year({
+    pos: pos,
+    year: BigInt(yer),
+    month: BigInt(month),
+    time: {
+      day: BigInt(day),
+      hour: BigInt(hour),
+      minute: BigInt(minute),
+      second: BigInt(sec),
+      ms: millis,
+    },
+  });
+}
+
+/**
+ * Given a bigint representing an urbit date, returns a string formatted as a proper `@da`.
+ *
+ * @param   {bigint}  x  The urbit date as bigint
+ * @return  {string}     The formatted `@da`
+ */
+export function renderDa(x: bigint) {
+  const { pos, year, month, time } = yore(x);
+  let out = `~${year}${pos ? '' : '-'}.${month}.${time.day}`;
+  if (time.hour !== 0n || time.minute !== 0n || time.second !== 0n || time.ms.length !== 0) {
+    out = out + `..${time.hour.toString().padStart(2, '0')}.${time.minute.toString().padStart(2, '0')}.${time.second.toString().padStart(2, '0')}`
+    if (time.ms.length !== 0) {
+      out = out + `..${time.ms.map((x) => x.toString(16).padStart(4, '0')).join('.')}`;
+    }
+  }
+  return out;
+}
+
+/**
+ * Given a bigint representing an urbit date, returns a unix timestamp.
+ *
+ * @param   {bigint}  da  The urbit date
+ * @return  {number}      The unix timestamp
+ */
+export function toUnix(da: bigint): number {
+  // ported from +time:enjs:format in hoon.hoon
+  const offset = DA_SECOND / 2000n;
+  const epochAdjusted = offset + (da - DA_UNIX_EPOCH);
+
+  return Math.round(
+    Number(epochAdjusted * 1000n / DA_SECOND)
+  );
+}
+
+/**
+ * Given a unix timestamp, returns a bigint representing an urbit date
+ *
+ * @param   {number}  unix  The unix timestamp
+ * @return  {bigint}        The urbit date
+ */
+export function fromUnix(unix: number): bigint {
+  const timeSinceEpoch = BigInt(unix) * DA_SECOND / 1000n;
+  return DA_UNIX_EPOCH + timeSinceEpoch;
+}
+
+//
+//  internals
+//
 
 interface Dat {
   pos: boolean;
@@ -33,7 +114,7 @@ const MIT_YO = 60n;
 const ERA_YO = 146097n;
 const CET_YO = 36524n;
 
-export function year(det: Dat) {
+function year(det: Dat) {
   const yer = det.pos
     ? EPOCH + (BigInt(det.year))
     : EPOCH - (BigInt(det.year) - 1n);
@@ -84,39 +165,6 @@ export function year(det: Dat) {
   }
 
   return fac | (sec << 64n);
-}
-
-/**
- * Given a string formatted as a @da, returns a bigint representing the urbit date.
- *
- * @return  {string}      x  The formatted @da
- * @return  {bigint}      x  The urbit date as bigint
- */
-export function parseDa(x: string): bigint {
-  let pos = true;
-  let [date, time, ms] = x.split('..');
-  time = time || '0.0.0';
-  ms = ms || '0000';
-  let [yer, month, day] = date.slice(1).split('.');
-  if (yer.at(-1) === '-') {
-    yer = yer.slice(0, -1);
-    pos = false;
-  }
-  const [hour, minute, sec] = time.split('.');
-  const millis = ms.split('.').map((m) => BigInt('0x'+m));
-
-  return year({
-    pos: pos,
-    year: BigInt(yer),
-    month: BigInt(month),
-    time: {
-      day: BigInt(day),
-      hour: BigInt(hour),
-      minute: BigInt(minute),
-      second: BigInt(sec),
-      ms: millis,
-    },
-  });
 }
 
 function yell(x: bigint): Tarp {
@@ -200,52 +248,4 @@ function yore(x: bigint): Dat {
     month,
     time,
   };
-}
-
-/**
- * Given a bigint representing an urbit date, returns a string formatted as a proper @da.
- *
- * @param   {bigint}      x  The urbit date as bigint
- * @return  {string}         The formatted @da
- */
-export function formatDa(x: bigint | string) {
-  if (typeof x === 'string') {
-    x = BigInt(x);
-  }
-  const { pos, year, month, time } = yore(x);
-  let out = `~${year}${pos ? '' : '-'}.${month}.${time.day}`;
-  if (time.hour !== 0n || time.minute !== 0n || time.second !== 0n || time.ms.length !== 0) {
-    out = out + `..${time.hour.toString().padStart(2, '0')}.${time.minute.toString().padStart(2, '0')}.${time.second.toString().padStart(2, '0')}`
-    if (time.ms.length !== 0) {
-      out = out + `..${time.ms.map((x) => x.toString(16).padStart(4, '0')).join('.')}`;
-    }
-  }
-  return out;
-}
-
-/**
- * Given a bigint representing an urbit date, returns a unix timestamp.
- *
- * @param   {bigint}      da  The urbit date
- * @return  {number}          The unix timestamp
- */
-export function daToUnix(da: bigint): number {
-  // ported from +time:enjs:format in hoon.hoon
-  const offset = DA_SECOND / 2000n;
-  const epochAdjusted = offset + (da - DA_UNIX_EPOCH);
-
-  return Math.round(
-    Number(epochAdjusted * 1000n / DA_SECOND)
-  );
-}
-
-/**
- * Given a unix timestamp, returns a bigint representing an urbit date
- *
- * @param   {number}      unix  The unix timestamp
- * @return  {bigint}            The urbit date
- */
-export function unixToDa(unix: number): bigint {
-  const timeSinceEpoch = BigInt(unix) * DA_SECOND / 1000n;
-  return DA_UNIX_EPOCH + timeSinceEpoch;
 }

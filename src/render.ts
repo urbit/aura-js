@@ -7,10 +7,10 @@
 
 import { aura, coin } from './types';
 
-import { formatDa } from './da';
+import { renderDa } from './da';
 import { renderP } from './p';
 import { renderQ } from './q';
-import { render as renderR } from './r';
+import { renderR } from './r';
 
 //  render(): scot()
 //  scot(): render atom as specific aura
@@ -47,7 +47,7 @@ export function rend(coin: coin): string {
         case 'd':
           switch(coin.aura[1]) {
             case 'a':
-              return formatDa(coin.atom);
+              return renderDa(coin.atom);
             case 'r':
               throw new Error('aura-js: @dr rendering unsupported'); //TODO
             default:

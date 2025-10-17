@@ -9,8 +9,8 @@ import { aura, dime, coin } from './types';
 
 import { parseDa } from './da';
 import { parseValidP, regexP } from './p';
-import { parseQ, parseValidQ } from './q';
-import { parse as parseR, precision } from './r';
+import { parseValidQ } from './q';
+import { parseR, precision } from './r';
 
 function integerRegex(a: string, b: string, c: string, d: number, e: boolean = false): RegExp {
   const pre = d === 0 ? b       : `${b}${c}{0,${d-1}}`;

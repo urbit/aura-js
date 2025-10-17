@@ -1,19 +1,21 @@
-import {
-  isValidPat,
-  patp2syls,
-  suffixes,
-  prefixes,
-} from './hoon';
 import ob from './hoon/ob';
+
+export type rank = 'czar'   | 'king' | 'duke'   | 'earl' | 'pawn';
+export type size = 'galaxy' | 'star' | 'planet' | 'moon' | 'comet';
+
+//
+//  main parsing & rendering
+//
 
 //NOTE  matches for shape, not syllables
 export const regexP = /^~([a-z]{3}|([a-z]{6}(\-[a-z]{6}){0,3}(\-(\-[a-z]{6}){4})*))$/;
 
 /**
  * Convert a valid `@p` literal string to a bigint.
- * @param {String} str certified-sane `@p` literal string
+ * Throws on malformed input.
+ * @param  {String}  str  certified-sane `@p` literal string
  */
-export function parseP(str: string, scramble: boolean = true): bigint {
+export function parseP(str: string): bigint {
   const syls = patp2syls(str);
 
   const syl2bin = (idx: number) => {
@@ -29,21 +31,65 @@ export function parseP(str: string, scramble: boolean = true): bigint {
   );
 
   const num = BigInt('0b' + addr);
-  return scramble ? ob.fynd(num) : num;
+  return ob.fynd(num);
 }
 
-function checkedParseP(str: string): bigint {
-  if (!isValidP(str)) throw new Error('invalid @p literal: ' + str);
-  return parseP(str);
+/**
+ * Convert a valid `@p` literal string to a bigint.
+ * Returns null on malformed input.
+ * @param  {String}  str  `@p` literal string
+ */
+export function parseValidP(str: string): bigint | null {
+  if (!regexP.test(str) || !validSyllables(str)) return null;
+  const res = parseP(str);
+  return (str === renderP(res)) ? res : null;
 }
 
-export type size = 'galaxy' | 'star' | 'planet' | 'moon' | 'comet';
-export type rank = 'czar' | 'king' | 'duke' | 'earl' | 'pawn';
+/**
+ * Convert a number to a @p-encoded string.
+ * @param  {bigint}  num
+ */
+export function renderP(num: bigint): string {
+  const sxz = ob.fein(num);
+  const dyx = Math.ceil(sxz.toString(16).length / 2);
+  const dyy = Math.ceil(sxz.toString(16).length / 4);
+
+  function loop(tsxz: bigint, timp: number, trep: string): string {
+    const log = tsxz & 0xFFFFn;
+    const pre = prefixes[Number(log >> 8n)];
+    const suf = suffixes[Number(log & 0xFFn)];
+    const etc = (timp & 0b11) ? '-' : ((timp === 0) ? '' : '--');
+
+    const res = pre + suf + etc + trep;
+
+    return timp === dyy ? trep : loop(tsxz >> 16n, timp + 1, res);
+  }
+
+  return (
+    '~' + (dyx <= 1 ? suffixes[Number(sxz)] : loop(sxz, 0, ''))
+  );
+}
+
+//
+//  utilities
+//
+
+/**
+ * Validate a @p string.
+ *
+ * @param  {String}  str a string
+ * @return  {boolean}
+ */
+export function isValidP(str: string): boolean {
+  return regexP.test(str)               //  general structure
+      && validSyllables(str)            //  valid syllables
+      && str === renderP(parseP(str));  //  no leading zeroes
+}
+
 /**
  * Determine the `$rank` of a `@p` value or literal.
- *
- * @param  {String}  @p
- * @return  {String}
+ * Throws on malformed input string.
+ * @param   {String}  who  `@p` value or literal string
  */
 export function clan(who: bigint | string): rank {
   let num: bigint;
@@ -61,9 +107,15 @@ export function clan(who: bigint | string): rank {
     : 'pawn';
 }
 
+/**
+ * Determine the "size" of a `@p` value or literal.
+ * Throws on malformed input string.
+ * @param   {String}  who  `@p` value or literal string
+ */
 export function kind(who: bigint | string): size {
   return rankToSize(clan(who));
 }
+
 export function rankToSize(rank: rank): size {
   switch (rank) {
     case 'czar': return 'galaxy';
@@ -73,12 +125,20 @@ export function rankToSize(rank: rank): size {
     case 'pawn': return 'comet';
   }
 }
+export function sizeToRank(size: size): rank {
+  switch (size) {
+    case 'galaxy': return 'czar';
+    case 'star':   return 'king';
+    case 'planet': return 'duke';
+    case 'moon':   return 'earl';
+    case 'comet':  return 'pawn';
+  }
+}
 
 /**
- * Determine the parent of a `@p` value. Throws on invalid string inputs.
- *
- * @param  {String | number} who `@p` value or literal string
- * @return  {String}
+ * Determine the parent of a `@p` value.
+ * Throws on malformed input string.
+ * @param  {String | number}  who  `@p` value or literal string
  */
 export function sein(who: bigint): bigint;
 export function sein(who: string): string;
@@ -105,55 +165,9 @@ export function sein(who: bigint | string): typeof who {
 }
 
 /**
- * Validate a @p string.
- *
- * @param  {String}  str a string
- * @return  {boolean}
- */
-export function isValidP(str: string): boolean {
-  return regexP.test(str)               //  general structure
-      && isValidPat(str)                //  valid syllables
-      && str === renderP(parseP(str));  //  no leading zeroes  //TODO  can isValidPat check this?
-}
-
-export function parseValidP(str: string): bigint | null {
-  if (!regexP.test(str) || !isValidPat(str)) return null;
-  const res = parseP(str);
-  return (str === renderP(res)) ? res : null;
-}
-
-/**
- * Convert a number to a @p-encoded string.
- *
- * @param {bigint} arg
- * @return  {String}
- */
-export function renderP(arg: bigint, scramble: boolean = true) {
-  const sxz = scramble ? ob.fein(arg) : arg;
-  const dyx = Math.ceil(sxz.toString(16).length / 2);
-  const dyy = Math.ceil(sxz.toString(16).length / 4);
-
-  function loop(tsxz: bigint, timp: number, trep: string): string {
-    const log = tsxz & 0xFFFFn;
-    const pre = prefixes[Number(log >> 8n)];
-    const suf = suffixes[Number(log & 0xFFn)];
-    const etc = (timp & 0b11) ? '-' : ((timp === 0) ? '' : '--');
-
-    const res = pre + suf + etc + trep;
-
-    return timp === dyy ? trep : loop(tsxz >> 16n, timp + 1, res);
-  }
-
-  return (
-    '~' + (dyx <= 1 ? suffixes[Number(sxz)] : loop(sxz, 0, ''))
-  );
-}
-
-/**
- * Render short-form ship name. Throws on invalid string inputs.
- *
- * @param  {String | number} who `@p` value or literal string
- * @return  {String}
+ * Render short-form ship name.
+ * Throws on malformed input string.
+ * @param  {String | number}  who  `@p` value or literal string
  */
 export function cite(who: bigint | string): string {
   let num: bigint;
@@ -167,4 +181,69 @@ export function cite(who: bigint | string): string {
   } else {
     return renderP(BigInt('0x'+num.toString(16).slice(0,4))) + '_' + renderP(num & 0xFFFFn).slice(1);
   }
+}
+
+//
+//  internals
+//
+
+function checkedParseP(str: string): bigint {
+  if (!isValidP(str)) throw new Error('invalid @p literal: ' + str);
+  return parseP(str);
+}
+
+const pre = `
+dozmarbinwansamlitsighidfidlissogdirwacsabwissib\
+rigsoldopmodfoglidhopdardorlorhodfolrintogsilmir\
+holpaslacrovlivdalsatlibtabhanticpidtorbolfosdot\
+losdilforpilramtirwintadbicdifrocwidbisdasmidlop\
+rilnardapmolsanlocnovsitnidtipsicropwitnatpanmin\
+ritpodmottamtolsavposnapnopsomfinfonbanmorworsip\
+ronnorbotwicsocwatdolmagpicdavbidbaltimtasmallig\
+sivtagpadsaldivdactansidfabtarmonranniswolmispal\
+lasdismaprabtobrollatlonnodnavfignomnibpagsopral\
+bilhaddocridmocpacravripfaltodtiltinhapmicfanpat\
+taclabmogsimsonpinlomrictapfirhasbosbatpochactid\
+havsaplindibhosdabbitbarracparloddosbortochilmac\
+tomdigfilfasmithobharmighinradmashalraglagfadtop\
+mophabnilnosmilfopfamdatnoldinhatnacrisfotribhoc\
+nimlarfitwalrapsarnalmoslandondanladdovrivbacpol\
+laptalpitnambonrostonfodponsovnocsorlavmatmipfip\
+`;
+
+const suf = `
+zodnecbudwessevpersutletfulpensytdurwepserwylsun\
+rypsyxdyrnuphebpeglupdepdysputlughecryttyvsydnex\
+lunmeplutseppesdelsulpedtemledtulmetwenbynhexfeb\
+pyldulhetmevruttylwydtepbesdexsefwycburderneppur\
+rysrebdennutsubpetrulsynregtydsupsemwynrecmegnet\
+secmulnymtevwebsummutnyxrextebfushepbenmuswyxsym\
+selrucdecwexsyrwetdylmynmesdetbetbeltuxtugmyrpel\
+syptermebsetdutdegtexsurfeltudnuxruxrenwytnubmed\
+lytdusnebrumtynseglyxpunresredfunrevrefmectedrus\
+bexlebduxrynnumpyxrygryxfeptyrtustyclegnemfermer\
+tenlusnussyltecmexpubrymtucfyllepdebbermughuttun\
+bylsudpemdevlurdefbusbeprunmelpexdytbyttyplevmyl\
+wedducfurfexnulluclennerlexrupnedlecrydlydfenwel\
+nydhusrelrudneshesfetdesretdunlernyrsebhulryllud\
+remlysfynwerrycsugnysnyllyndyndemluxfedsedbecmun\
+lyrtesmudnytbyrsenwegfyrmurtelreptegpecnelnevfes\
+`;
+
+export const prefixes = pre.match(/.{1,3}/g) as RegExpMatchArray;
+export const suffixes = suf.match(/.{1,3}/g) as RegExpMatchArray;
+
+function patp2syls(name: string): string[] {
+  return name.replace(/[\^~-]/g, '').match(/.{1,3}/g) || [];
+}
+
+//  check if string contains valid syllables
+function validSyllables(name: string): boolean {
+  const syls = patp2syls(name);
+  return !(syls.length % 2 !== 0 && syls.length !== 1)  // wrong length
+      && syls.every((syl, index) =>  //  invalid syllables
+           index % 2 !== 0 || syls.length === 1
+           ? suffixes.includes(syl)
+           : prefixes.includes(syl)
+         );
 }

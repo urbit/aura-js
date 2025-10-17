@@ -2,12 +2,12 @@ export type precision = 'h' | 's' | 'd' | 'q' | precisionBits;
 type precisionBits = { w: number, p: number, l: string };
 
 //  str: @r* format string including its leading . and ~s
-export function parse(per: precision, str: string): bigint {
+export function parseR(per: precision, str: string): bigint {
   per = getPrecision(per);
-  return parseR(str.slice(per.l.length), per.w, per.p);
+  return parse(str.slice(per.l.length), per.w, per.p);
 }
 
-export function render(per: precision, r: bigint): string {
+export function renderR(per: precision, r: bigint): string {
   per = getPrecision(per);
   return per.l + rCo(deconstruct(r, BigInt(per.w), BigInt(per.p)));
 }
@@ -35,7 +35,7 @@ function bitMask(bits: bigint): bigint {
 //  str: @r* format string with its leading . and ~ stripped off
 //  w:   exponent bits
 //  p:   mantissa bits
-function parseR(str: string, w: number, p: number): bigint {
+function parse(str: string, w: number, p: number): bigint {
   if (str === 'nan')  return makeNaN(w, p);
   if (str === 'inf')  return makeInf(true, w, p);
   if (str === '-inf') return makeInf(false, w, p);

@@ -1,13 +1,11 @@
-import { isValidPat, prefixes, suffixes } from './hoon';
-import { chunk, splitAt } from './utils';  //TODO  inline
+import { prefixes, suffixes } from './p';
 
 //TODO  investigate whether native UintArrays are more portable
 //      than node Buffers
 
 /**
- * Convert a number to a @q-encoded string.
- *
- * @param  {String, Number, bigint}  arg
+ * Convert a number to a `@q`-encoded string.
+ * @param   {bigint}  num
  * @return  {String}
  */
 export function renderQ(num: bigint): string {
@@ -40,9 +38,9 @@ export function renderQ(num: bigint): string {
 }
 
 /**
- * Convert a @q-encoded string to a bigint
- *
- * @param  {String}  name @q
+ * Convert a `@q`-encoded string to a bigint.
+ * Throws on malformed input.
+ * @param   {String}  str `@q` string with leading .~
  * @return  {String}
  */
 export function parseQ(str: string): bigint {
@@ -72,9 +70,8 @@ export function parseValidQ(str: string): bigint | null {
 }
 
 /**
- * Validate a @q string.
- *
- * @param  {String}  str a string
+ * Validate a `@q` string.
+ * @param   {String}  str  a string
  * @return  {boolean}
  */
 export function isValidQ(str: string): boolean {
@@ -86,3 +83,27 @@ export function isValidQ(str: string): boolean {
     return false;
   }
 };
+
+//
+//  internals
+//
+
+function chunk<T>(arr: T[], size: number): T[][] {
+  let chunk: T[] = [];
+  let newArray = [chunk];
+
+  for (let i = 0; i < arr.length; i++) {
+    if (chunk.length < size) {
+      chunk.push(arr[i]);
+    } else {
+      chunk = [arr[i]];
+      newArray.push(chunk);
+    }
+  }
+
+  return newArray;
+}
+
+function splitAt(index: number, str: string) {
+  return [str.slice(0, index), str.slice(index)];
+}
