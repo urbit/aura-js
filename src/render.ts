@@ -3,13 +3,13 @@
 //    atom literal rendering from hoon 137 (and earlier).
 //    stdlib arm names are included for ease of cross-referencing.
 //
-//TODO  unsupported auras: @r*, @if, @is
+//TODO  unsupported auras: @dr, @if, @is
 
 import { aura, coin } from './types';
 
 import { formatDa } from './da';
-import { patp } from './p';
-import { patq } from './q';
+import { renderP } from './p';
+import { renderQ } from './q';
 import { render as renderR } from './r';
 
 //  render(): scot()
@@ -68,9 +68,9 @@ export function rend(coin: coin): string {
             default: return zco(coin.atom);
           }
         case 'p':
-          return patp(coin.atom);
+          return renderP(coin.atom);
         case 'q':
-          return '.' + patq(coin.atom);
+          return renderQ(coin.atom);
         case 'r':
           switch(coin.aura[1]) {
             case 'd': return renderR('d', coin.atom);

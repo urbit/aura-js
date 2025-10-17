@@ -151,6 +151,7 @@ describe('invalid syntax', () => {
     expect(nuck('~zad')).toEqual(null);
     expect(nuck('.~zad')).toEqual(null);
     expect(nuck('~zodbin')).toEqual(null);
+    expect(nuck('~dozzod')).toEqual(null);
     expect(nuck('.~zodbin')).toEqual(null);
     expect(nuck('~funpal')).toEqual(null);
     expect(nuck('.~funpal')).toEqual(null);
@@ -158,7 +159,7 @@ describe('invalid syntax', () => {
     expect(nuck('.~nidsut-dun')).toEqual(null);
     expect(nuck('~mister--dister')).toEqual(null);
     expect(nuck('.~mister--dister')).toEqual(null);
-  })
+  });
 });
 
 //TODO  oversized floats

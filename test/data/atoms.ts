@@ -478,6 +478,10 @@ export const PHONETIC_TESTS: {
     'p': '~nidmes-samrut',
     'q': '.~sef-palsub'
   },
+  { 'n': 773182725n,
+    'p': '~dozreg-palfun',
+    'q': '.~fospeg-fopper',
+  },
   { 'n': 319478973361751151n,
     'p': '~sampel-sampel-lacwyl-tirder',
     'q': '.~sampel-sampel-dozpel-sampel',
@@ -485,6 +489,11 @@ export const PHONETIC_TESTS: {
   { 'n': 319478973354476655n,
     'p': '~sampel-sampel-dozzod-sampel',
     'q': '.~sampel-sampel-dozzod-sampel',
+  },
+  //  absurdly long
+  { 'n': 0x7468697320697320736f6d6520766572792068696768207175616c69747920656e74726f7079n,
+    'p': '~divmes-davset-holdet--sallun-salpel-taswet-holtex--watmeb-tarlun-picdet-magmes--holter-dacruc-timdet-divtud--holwet-maldut-padpel-sivtud',
+    'q': '.~divmes-davset-holdet--sallun-salpel-taswet-holtex--watmeb-tarlun-picdet-magmes--holter-dacruc-timdet-divtud--holwet-maldut-padpel-sivtud'
   },
 ];
 

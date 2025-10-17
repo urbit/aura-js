@@ -3,13 +3,13 @@
 //    atom literal parsing from hoon 137 (and earlier).
 //    stdlib arm names are included for ease of cross-referencing.
 //
-//TODO  unsupported auras: @r*, @if, @is
+//TODO  unsupported auras: @dr, @if, @is
 
 import { aura, dime, coin } from './types';
 
 import { parseDa } from './da';
-import { isValidPatp, patp2bn } from './p';
-import { isValidPatq, patq2bn } from './q';
+import { parseValidP, regexP } from './p';
+import { parseQ, parseValidQ } from './q';
 import { parse as parseR, precision } from './r';
 
 function integerRegex(a: string, b: string, c: string, d: number, e: boolean = false): RegExp {
@@ -29,7 +29,7 @@ export const regex: { [key in aura]: RegExp } = {
   'dr':  /^~((d|h|m|s)(0|[1-9][0-9]*))(\.(d|h|m|s)(0|[1-9][0-9]*))?(\.(\.[0-9a-f]{4})+)?$/,
   'f':   /^\.(y|n)$/,
   'n':   /^~$/,
-  'p':   /^~([a-z]{3}|([a-z]{6}(\-[a-z]{6}){0,3}(\-(\-[a-z]{6}){4})*))$/,  //NOTE  matches shape but not syllables
+  'p':   regexP,  //NOTE  matches shape but not syllables
   'q':   /^\.~(([a-z]{3}|[a-z]{6})(\-[a-z]{6})*)$/,  //NOTE  matches shape but not syllables
   'rd':  floatRegex(1),
   'rh':  floatRegex(2),
@@ -168,17 +168,9 @@ export function nuck(str: string): coin | null {
       return { type: 'dime', aura, atom: parseR(aura[1] as precision, str) };
     } else
     if (str[1] === '~' && regex['q'].test(str)) {
-      const q = str.slice(1);  //NOTE  q.ts insanity, need to strip leading .
-      try {
-        if (!isValidPatq(q)) {
-          console.log('invalid @q', q);
-          return null;
-        } else {
-          return { type: 'dime', aura: 'q', atom: patq2bn(q) }
-        }
-      } catch(e) {
-        return null;
-      }
+      const num = parseValidQ(str);
+      if (num === null) return null;
+      return { type: 'dime', aura: 'q', atom: num };
     } else
     //TODO  %is, %if  //  "zust"
     if (str[1] === '_' && /^\.(_([0-9a-zA-Z\-\.]|~\-|~~)+)*__$/.test(str)) {  //  "nusk"
@@ -209,11 +201,10 @@ export function nuck(str: string): coin | null {
         return null;
       } else
       if (regex['p'].test(str)) {
-        if (!isValidPatp(str)) {
-          return null;
-        } else {
-          return { type: 'dime', aura: 'p', atom: patp2bn(str) };
-        }
+        //NOTE  this still does the regex check twice...
+        const res = parseValidP(str);
+        if (res === null) return null;
+        return { type: 'dime', aura: 'p', atom: res };
       } else
       //TODO  test if these single-character checks affect performance or no,
       //      or if we want to move them further up, etc.

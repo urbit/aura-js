@@ -42,15 +42,6 @@ export const suffixes = suf.match(/.{1,3}/g) as RegExpMatchArray;
 
 export const bex = (n: bigint) => 2n ** n;
 
-export const rsh = (a: bigint, b: bigint, c: bigint) =>
-  c / bex(bex(a) * b);
-
-export const met = (a: bigint, b: bigint, c = 0n): bigint =>
-  (b === 0n) ? c : met(a, rsh(a, 1n, b), c + 1n);
-
-export const end = (a: bigint, b: bigint, c: bigint) =>
-  c % bex(bex(a) * b);
-
 export const patp2syls = (name: string): string[] =>
   name.replace(/[\^~-]/g, '').match(/.{1,3}/g) || [];
 
@@ -66,16 +57,13 @@ export const patp2syls = (name: string): string[] =>
  * @param  {String}  name a @p or @q value
  * @return  {boolean}
  */
+//TODO  rename validSyllables
 export function isValidPat(name: string): boolean {
   if (typeof name !== 'string') {
     throw new Error('isValidPat: non-string input');
   }
-
-  const leadingTilde = name.slice(0, 1) === '~';
-
-  if (leadingTilde === false || name.length < 4) {
-    return false;
-  } else {
+  else if (name.length < 4 || name[0] !== '~') return false;
+  else {
     const syls = patp2syls(name);
     const wrongLength = syls.length % 2 !== 0 && syls.length !== 1;
     const sylsExist = syls.reduce(
