@@ -13,6 +13,10 @@ const auras: aura[] = [
   // 'n',  //  limited legitimate values
   'p',
   'q',
+  // 'rh',  //  strict size limits, and NaN won't always round-trip
+  // 'rd',  //
+  // 'rq',  //
+  // 'rs',  //
   'sb',
   'sd',
   'si',
