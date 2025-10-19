@@ -10,6 +10,8 @@ const auras: aura[] = [
   'da',
   // 'dr', //TODO  unsupported
   // 'f',  //  limited legitimate values
+  // 'if',  //  fixed size
+  // 'is',  //  fixed size
   // 'n',  //  limited legitimate values
   'p',
   'q',

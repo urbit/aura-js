@@ -1,6 +1,7 @@
 import { aura } from '../src/types';
 import { tryParse as parse, decodeString, nuck, regex } from '../src/parse';
 import { INTEGER_AURAS, INTEGER_TESTS,
+         IPV4_TESTS, IPV6_TESTS,
          FLOAT_16_TESTS, FLOAT_32_TESTS, FLOAT_64_TESTS, FLOAT_128_TESTS,
          PHONETIC_AURAS, PHONETIC_TESTS,
          DATE_AURAS, DATE_TESTS,
@@ -82,6 +83,8 @@ const OUR_DATE_TESTS: {
 ];
 
 testAuras('integer', INTEGER_AURAS, INTEGER_TESTS);
+testAuras('ipv4', ['if'], IPV4_TESTS);
+testAuras('ipv6', ['is'], IPV6_TESTS);
 testAuras('float16',  ['rh'], FLOAT_16_TESTS);
 testAuras('float32',  ['rs'], FLOAT_32_TESTS);
 testAuras('float64',  ['rd'], FLOAT_64_TESTS);
@@ -159,6 +162,14 @@ describe('invalid syntax', () => {
     expect(nuck('.~nidsut-dun')).toEqual(null);
     expect(nuck('~mister--dister')).toEqual(null);
     expect(nuck('.~mister--dister')).toEqual(null);
+  });
+});
+
+describe('oversized inputs', () => {
+  it('parses oversized @if', () => {
+    expect(parse('if', '.255.0.0.999')).toEqual(0xff0003e7n);
+    expect(parse('if', '.255.0.1.999')).toEqual(0xff0004e7n);
+    expect(parse('if', '.256.0.0.255')).toEqual(0x1000000ffn);
   });
 });
 

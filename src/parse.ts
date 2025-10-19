@@ -3,7 +3,7 @@
 //    atom literal parsing from hoon 137 (and earlier).
 //    stdlib arm names are included for ease of cross-referencing.
 //
-//TODO  unsupported auras: @dr, @if, @is, @uc
+//TODO  unsupported auras: @dr, @uc
 
 import { aura, dime, coin } from './types';
 
@@ -28,6 +28,8 @@ export const regex: { [key in aura]: RegExp } = {
   'da':  /^~(0|[1-9][0-9]*)\-?\.([1-9]|1[0-2])\.([1-9]|[1-3][0-9])(\.\.([0-9]+)\.([0-9]+)\.([0-9]+)(\.(\.[0-9a-f]{4})+)?)?$/,
   'dr':  /^~((d|h|m|s)(0|[1-9][0-9]*))(\.(d|h|m|s)(0|[1-9][0-9]*))?(\.(\.[0-9a-f]{4})+)?$/,
   'f':   /^\.(y|n)$/,
+  'if':  /^(\.(0|[1-9][0-9]{0,2})){4}$/,
+  'is':  /^(\.(0|[1-9a-fA-F][0-9a-fA-F]{0,3})){8}$/,
   'n':   /^~$/,
   'p':   regexP,  //NOTE  matches shape but not syllables
   'q':   /^\.~(([a-z]{3}|[a-z]{6})(\-[a-z]{6})*)$/,  //NOTE  matches shape but not syllables
@@ -150,6 +152,14 @@ export function nuck(str: string): coin | null {
     //        going down the list of options this way matches hoon parser behavior the closest, but is slow for the "miss" case.
     //        could be optimized by hard-returning if the regex fails for cases where the lead char is unique.
     //        should probably run some perf tests
+    if (regex['is'].test(str)) {
+      const value = str.slice(1).split('.').reduce((a, v) => a + v.padStart(4, '0'), '');
+      return { type: 'dime', aura: 'is', atom: BigInt('0x'+value) };
+    } else
+    if (regex['if'].test(str)) {
+      const value = str.slice(1).split('.').reduce((a, v, i) => (a + (BigInt(v) << BigInt(8 * (3 - i)))), 0n);
+      return { type: 'dime', aura: 'if', atom: value };
+    } else
     if ( ( str[1] === '~' &&
            (regex['rd'].test(str) || regex['rh'].test(str) || regex['rq'].test(str)) )
       || regex['rs'].test(str) ) {  //  "royl"
@@ -170,7 +180,6 @@ export function nuck(str: string): coin | null {
       if (num === null) return null;
       return { type: 'dime', aura: 'q', atom: num };
     } else
-    //TODO  %is, %if  //  "zust"
     if (str[1] === '_' && /^\.(_([0-9a-zA-Z\-\.]|~\-|~~)+)*__$/.test(str)) {  //  "nusk"
       const coins = str.slice(1, -2).split('_').slice(1).map((s): coin | null => {
         //NOTE  real +wick produces null for strings w/ other ~ chars,
