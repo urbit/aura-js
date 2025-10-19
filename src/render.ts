@@ -3,7 +3,7 @@
 //    atom literal rendering from hoon 137 (and earlier).
 //    stdlib arm names are included for ease of cross-referencing.
 //
-//TODO  unsupported auras: @dr, @if, @is, @uc
+//TODO  unsupported auras: @dr, @uc
 
 import { aura, coin } from './types';
 
@@ -63,8 +63,8 @@ export function rend(coin: coin): string {
           return '~';
         case 'i':
           switch(coin.aura[1]) {
-            case 'f': throw new Error('aura-js: @if rendering unsupported'); //TODO
-            case 's': throw new Error('aura-js: @is rendering unsupported'); //TODO
+            case 'f': return '.' + spite(coin.atom, 1, 4, 10);
+            case 's': return '.' + spite(coin.atom, 2, 8, 16);
             default: return zco(coin.atom);
           }
         case 'p':
@@ -188,6 +188,19 @@ function split(str: string, group: number): string {
   //  insert '.' every $group characters counting from the end,
   //  while avoiding putting a leading dot at the start
   return str.replace(new RegExp(`(?=(?:.{${group}})+$)(?!^)`, 'g'), '.');
+}
+
+//  byte-level split()
+function spite(atom: bigint, bytes: number, groups: number, base: number = 10): string {
+  let out = '';
+  const size = 8n * BigInt(bytes);
+  const mask = (1n << size) - 1n;
+  while (groups-- > 0) {
+    if (out !== '') out = '.' + out;
+    out = (atom & mask).toString(base) + out;
+    atom = atom >> size;
+  }
+  return out;
 }
 
 function cordToString(atom: bigint): string {

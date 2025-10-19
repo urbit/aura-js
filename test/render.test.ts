@@ -1,6 +1,7 @@
 import { aura, coin } from '../src/types';
 import { render, rend } from '../src/render';
 import { INTEGER_AURAS, INTEGER_TESTS,
+         IPV4_TESTS, IPV6_TESTS,
          FLOAT_16_TESTS, FLOAT_32_TESTS, FLOAT_64_TESTS, FLOAT_128_TESTS,
          PHONETIC_AURAS, PHONETIC_TESTS,
          DATE_AURAS, DATE_TESTS,
@@ -17,7 +18,7 @@ describe('limited auras', () => {
       expect(bad).toEqual('~');
     });
   });
-  describe(`@f parsing`, () => {
+  describe(`@f rendering`, () => {
     it('renders', () => {
       const yea = render('f', 0n);
       expect(yea).toEqual('.y');
@@ -49,6 +50,8 @@ function testAuras(desc: string, auras: aura[], tests: { n: bigint }[]) {
 }
 
 testAuras('integer', INTEGER_AURAS, INTEGER_TESTS);
+testAuras('ipv4', ['if'], IPV4_TESTS);
+testAuras('ipv6', ['is'], IPV6_TESTS);
 testAuras('float16',  ['rh'], FLOAT_16_TESTS);
 testAuras('float32',  ['rs'], FLOAT_32_TESTS);
 testAuras('float64',  ['rd'], FLOAT_64_TESTS);
@@ -87,5 +90,14 @@ describe('blob rendering', () => {
   it('parses', () => {
     expect(rend({ type: 'blob', jam: 2n })).toEqual('~02');
     expect(rend({ type: 'blob', jam: 325350265702017n })).toEqual('~097su1g7hk1');
+  });
+});
+
+describe('oversized inputs', () => {
+  it('truncates oversized @if', () => {
+    expect(render('if', 0x1000000ffn)).toEqual('.0.0.0.255');
+  });
+  it('truncates oversized @is', () => {
+    expect(render('is', 0xaaaaffff000000000000000000000000ffffn)).toEqual('.ffff.0.0.0.0.0.0.ffff');
   });
 });
