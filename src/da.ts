@@ -110,6 +110,22 @@ export function fromUnix(unix: number): bigint {
   return DA_UNIX_EPOCH + timeSinceEpoch;
 }
 
+/**
+ * Given a number of seconds, return a bigint representing its `@dr`
+ */
+export function fromSeconds(seconds: bigint): bigint {
+  return yule({ day: 0n, hour: 0n, minute: 0n, second: seconds, ms: [] });
+}
+
+/**
+ * Convert a `@dr` to the amount of seconds it represents, dropping sub-
+ * second precision
+ */
+export function toSeconds(dr: bigint): bigint {
+  const { day, hour, minute, second } = yell(dr);
+  return (((((day * 24n) + hour) * 60n) + minute) * 60n) + second;
+}
+
 //
 //  internals
 //

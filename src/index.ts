@@ -6,8 +6,9 @@ export { render, scot, rend } from './render';  //TODO  expose encodeString() ?
 
 //  atom utils
 
-import { toUnix, fromUnix } from './da';
+import { toUnix, fromUnix, fromSeconds, toSeconds } from './da';
 export const da = { toUnix, fromUnix };
+export const dr = { toSeconds, fromSeconds };
 
 import type * as pt from './p';
 import { cite, sein, clan, kind, rankToSize, sizeToRank } from './p';
