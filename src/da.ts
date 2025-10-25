@@ -31,6 +31,25 @@ export function parseDa(x: string): bigint {
   });
 }
 
+export function parseDr(x: string): bigint {
+  const rop: Tarp = { day: 0n, hour: 0n, minute: 0n, second: 0n, ms: [] };
+  x = x.slice(1);  //  strip ~
+  let [time, ms] = x.split('..');
+  ms = ms || '0000';
+  rop.ms = ms.split('.').map((m) => BigInt('0x' + m));
+  time.split('.').forEach((a) => {
+    switch (a[0]) {
+      case 'd': rop.day    += BigInt(a.slice(1)); break;
+      case 'h': rop.hour   += BigInt(a.slice(1)); break;
+      case 'm': rop.minute += BigInt(a.slice(1)); break;
+      case 's': rop.second += BigInt(a.slice(1)); break;
+      default: throw new Error('bad dr: ' + x);
+    }
+  });
+  ms = ms || '0000';
+  return yule(rop);
+}
+
 /**
  * Given a bigint representing an urbit date, returns a string formatted as a proper `@da`.
  *
@@ -149,19 +168,24 @@ function year(det: Dat) {
     return d;
   })();
 
-  let sec = BigInt(det.time.second)
-    + (DAY_YO * day)
-    + (HOR_YO * BigInt(det.time.hour))
-    + (MIT_YO * BigInt(det.time.minute));
+  det.time.day = day;
+  return yule(det.time);
+}
 
-  let ms = det.time.ms;
+function yule(rip: Tarp): bigint {
+  let sec = rip.second
+    + (DAY_YO * rip.day)
+    + (HOR_YO * rip.hour)
+    + (MIT_YO * rip.minute);
+
+  let ms = rip.ms;
   let fac = 0n;
-  let muc = 3;
+  let muc = 3n;
   while (ms.length !== 0) {
     const [first, ...rest] = ms;
-    fac = fac + (first << BigInt(16 * muc));
+    fac = fac + (first << (16n * muc));
     ms = rest;
-    muc -= 1;
+    muc -= 1n;
   }
 
   return fac | (sec << 64n);

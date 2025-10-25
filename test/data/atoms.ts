@@ -695,6 +695,31 @@ export const DATE_TESTS: {
   }
 ];
 
+export const TIME_AURAS: aura[] = ['dr'];
+export const TIME_TESTS: {
+  n: bigint,
+  dr: string
+}[] = [
+  { 'n': 0n,
+    'dr': '~s0'
+  },
+  { 'n': 281474976710656n,
+    'dr': '~s0..0001'
+  },
+  { 'n': 18446744073709551616n,
+    'dr': '~s1'
+  },
+  { 'n': 1661332218022355928088576n,
+    'dr': '~d1.h1.m1.s1'
+  },
+  { 'n': 1968341379640822520656953344n,
+    'dr': '~d1234.h23.m59.s59..ffff'
+  },
+  { 'n': 1968341361194641392605855744n,
+    'dr': '~d1234.h23.m59.s59..0000.ffff'
+  },
+]
+
 export const TEXT_AURAS: aura[] = [ 't' ];
 export const TEXT_TESTS: {
   n: bigint,

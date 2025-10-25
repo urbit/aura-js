@@ -5,6 +5,7 @@ import { INTEGER_AURAS, INTEGER_TESTS,
          FLOAT_16_TESTS, FLOAT_32_TESTS, FLOAT_64_TESTS, FLOAT_128_TESTS,
          PHONETIC_AURAS, PHONETIC_TESTS,
          DATE_AURAS, DATE_TESTS,
+         TIME_AURAS, TIME_TESTS,
          TEXT_AURAS, TEXT_TESTS,
          CHAR_AURAS, CHAR_TESTS,
        } from './data/atoms';
@@ -81,6 +82,27 @@ const OUR_DATE_TESTS: {
     'da': '~2000.1.1..11.11.11..aabb.0000'
   }
 ];
+const OUR_TIME_TESTS: {
+  n: bigint,
+  dr: string
+}[] = [
+  ...TIME_TESTS,
+  { 'n': 9979688543876867424256n,
+    'dr': '~m1.m5.s1.m3'
+  },
+  { 'n': 18446744073709551616n,
+    'dr': '~s1..0000'
+  },
+  { 'n': 18446744073709551616n,
+    'dr': '~s1..0000.0000'
+  },
+  { 'n': 18446744073709551616n,
+    'dr': '~d0.h0.s1.m0'
+  },
+  { 'n': 69059795211765323057332224n,
+    'dr': '~d1.h999.m999.s999'
+  },
+]
 
 testAuras('integer', INTEGER_AURAS, INTEGER_TESTS);
 testAuras('ipv4', ['if'], IPV4_TESTS);
@@ -91,6 +113,7 @@ testAuras('float64',  ['rd'], FLOAT_64_TESTS);
 testAuras('float128', ['rq'], FLOAT_128_TESTS);
 testAuras('phonetic', PHONETIC_AURAS, PHONETIC_TESTS);
 testAuras('date', DATE_AURAS, OUR_DATE_TESTS);
+testAuras('time', TIME_AURAS, OUR_TIME_TESTS);
 testAuras('text', [ 't' ], TEXT_TESTS);
 testAuras('chars', CHAR_AURAS, CHAR_TESTS);
 

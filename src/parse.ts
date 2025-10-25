@@ -7,7 +7,7 @@
 
 import { aura, dime, coin } from './types';
 
-import { parseDa } from './da';
+import { parseDa, parseDr } from './da';
 import { parseValidP, regexP } from './p';
 import { parseValidQ } from './q';
 import { parseR, precision } from './r';
@@ -26,7 +26,7 @@ function floatRegex(a: number): RegExp {
 export const regex: { [key in aura]: RegExp } = {
   'c':   /^~\-((~[0-9a-fA-F]+\.)|(~[~\.])|[0-9a-z\-\._])*$/,
   'da':  /^~(0|[1-9][0-9]*)\-?\.([1-9]|1[0-2])\.([1-9]|[1-3][0-9])(\.\.([0-9]+)\.([0-9]+)\.([0-9]+)(\.(\.[0-9a-f]{4})+)?)?$/,
-  'dr':  /^~((d|h|m|s)(0|[1-9][0-9]*))(\.(d|h|m|s)(0|[1-9][0-9]*))?(\.(\.[0-9a-f]{4})+)?$/,
+  'dr':  /^~((d|h|m|s)(0|[1-9][0-9]*))(\.(d|h|m|s)(0|[1-9][0-9]*))*(\.(\.[0-9a-f]{4})+)?$/,  //TODO  first ? to * mb
   'f':   /^\.(y|n)$/,
   'if':  /^(\.(0|[1-9][0-9]{0,2})){4}$/,
   'is':  /^(\.(0|[1-9a-fA-F][0-9a-fA-F]{0,3})){8}$/,
@@ -203,9 +203,7 @@ export function nuck(str: string): coin | null {
         return { type: 'dime', aura: 'da', atom: parseDa(str) };
       } else
       if (regex['dr'].test(str)) {
-        //TODO  support @dr
-        console.log('aura-js: @dr unsupported (nuck)');
-        return null;
+        return { type: 'dime', aura: 'dr', atom: parseDr(str) };
       } else
       if (regex['p'].test(str)) {
         //NOTE  this still does the regex check twice...
@@ -251,7 +249,7 @@ function bisk(str: string): dime | null {
       }
 
     case '0c':  //  "fim"
-      //TODO  support base58
+      //TODO  support base58check
       console.log('aura-js: @uc parsing unsupported (bisk)');
       return null;
 
