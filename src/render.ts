@@ -3,11 +3,11 @@
 //    atom literal rendering from hoon 137 (and earlier).
 //    stdlib arm names are included for ease of cross-referencing.
 //
-//TODO  unsupported auras: @dr, @uc
+//TODO  unsupported auras: @uc
 
 import { aura, coin } from './types';
 
-import { renderDa } from './da';
+import { renderDa, renderDr } from './da';
 import { renderP } from './p';
 import { renderQ } from './q';
 import { renderR } from './r';
@@ -49,7 +49,7 @@ export function rend(coin: coin): string {
             case 'a':
               return renderDa(coin.atom);
             case 'r':
-              throw new Error('aura-js: @dr rendering unsupported'); //TODO
+              return renderDr(coin.atom);
             default:
               return zco(coin.atom);
           }

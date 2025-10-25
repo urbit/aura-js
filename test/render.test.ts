@@ -5,6 +5,7 @@ import { INTEGER_AURAS, INTEGER_TESTS,
          FLOAT_16_TESTS, FLOAT_32_TESTS, FLOAT_64_TESTS, FLOAT_128_TESTS,
          PHONETIC_AURAS, PHONETIC_TESTS,
          DATE_AURAS, DATE_TESTS,
+         TIME_AURAS, TIME_TESTS,
          TEXT_AURAS, TEXT_TESTS,
          CHAR_AURAS, CHAR_TESTS,
        } from './data/atoms';
@@ -58,6 +59,7 @@ testAuras('float64',  ['rd'], FLOAT_64_TESTS);
 testAuras('float128', ['rq'], FLOAT_128_TESTS);
 testAuras('phonetic', PHONETIC_AURAS, PHONETIC_TESTS);
 testAuras('date', DATE_AURAS, DATE_TESTS);
+testAuras('time', TIME_AURAS, TIME_TESTS);
 testAuras('text', TEXT_AURAS, TEXT_TESTS);
 testAuras('chars', CHAR_AURAS, CHAR_TESTS);
 

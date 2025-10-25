@@ -56,7 +56,7 @@ export function parseDr(x: string): bigint {
  * @param   {bigint}  x  The urbit date as bigint
  * @return  {string}     The formatted `@da`
  */
-export function renderDa(x: bigint) {
+export function renderDa(x: bigint): string {
   const { pos, year, month, time } = yore(x);
   let out = `~${year}${pos ? '' : '-'}.${month}.${time.day}`;
   if (time.hour !== 0n || time.minute !== 0n || time.second !== 0n || time.ms.length !== 0) {
@@ -66,6 +66,21 @@ export function renderDa(x: bigint) {
     }
   }
   return out;
+}
+
+export function renderDr(x: bigint): string {
+  if (x === 0n) return '~s0';
+  const { day, hour, minute, second, ms } = yell(x);
+  let out: string[] = [];
+  if (day    !== 0n) out.push('d' + day.toString());
+  if (hour   !== 0n) out.push('h' + hour.toString());
+  if (minute !== 0n) out.push('m' + minute.toString());
+  if (second !== 0n) out.push('s' + second.toString());
+  if (ms.length !== 0) {
+    if (out.length === 0) out.push('s0');
+    out.push('.' + ms.map((x) => x.toString(16).padStart(4, '0')).join('.'));
+  }
+  return '~' + out.join('.');
 }
 
 /**

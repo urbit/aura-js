@@ -9,7 +9,7 @@ const testCount = 50;
 const simpleAuras: aura[] = [
   'c',
   'da',
-  // 'dr', //TODO  unsupported
+  'dr',
   // 'f',  //  limited legitimate values
   // 'if',  //  won't round-trip above "native" size limit
   // 'is',  //  won't round-trip above "native" size limit
