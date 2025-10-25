@@ -7,7 +7,7 @@
 
 import { aura, dime, coin } from './types';
 
-import { parseDa, parseDr } from './da';
+import { parseDa, parseDr } from './d';
 import { parseValidP, regexP } from './p';
 import { parseValidQ } from './q';
 import { parseR, precision } from './r';

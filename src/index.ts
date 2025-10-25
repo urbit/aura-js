@@ -6,7 +6,7 @@ export { render, scot, rend } from './render';  //TODO  expose encodeString() ?
 
 //  atom utils
 
-import { toUnix, fromUnix, fromSeconds, toSeconds } from './da';
+import { toUnix, fromUnix, fromSeconds, toSeconds } from './d';
 export const da = { toUnix, fromUnix };
 export const dr = { toSeconds, fromSeconds };
 

@@ -7,7 +7,7 @@
 
 import { aura, coin } from './types';
 
-import { renderDa, renderDr } from './da';
+import { renderDa, renderDr } from './d';
 import { renderP } from './p';
 import { renderQ } from './q';
 import { renderR } from './r';
