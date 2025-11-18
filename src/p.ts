@@ -1,40 +1,26 @@
-import {
-  isValidPat,
-  patp2syls,
-  suffixes,
-  prefixes,
-  met,
-  end,
-  rsh,
-} from './hoon';
 import ob from './hoon/ob';
 
-/**
- * Convert a hex-encoded string to a @p-encoded string.
- *
- * @param  {String}  hex
- * @return  {String}
- */
-export function hex2patp(hex: string): string {
-  if (hex === null) {
-    throw new Error('hex2patp: null input');
-  }
-  return patp(BigInt('0x'+hex));
-}
+export type rank = 'czar'   | 'king' | 'duke'   | 'earl' | 'pawn';
+export type size = 'galaxy' | 'star' | 'planet' | 'moon' | 'comet';
+
+//
+//  main parsing & rendering
+//
+
+//NOTE  matches for shape, not syllables
+export const regexP = /^~([a-z]{3}|([a-z]{6}(\-[a-z]{6}){0,3}(\-(\-[a-z]{6}){4})*))$/;
 
 /**
- * Convert a @p-encoded string to a hex-encoded string.
- *
- * @param  {String}  name @p
- * @return  {String}
+ * Convert a valid `@p` literal string to a bigint.
+ * Throws on malformed input.
+ * @param  {String}  str  certified-sane `@p` literal string
  */
-export function patp2hex(name: string): string {
-  if (isValidPat(name) === false) {
-    throw new Error('patp2hex: not a valid @p');
-  }
-  const syls = patp2syls(name);
+export function parseP(str: string): bigint {
+  const syls = patp2syls(str);
 
-  const syl2bin = (idx: number) => idx.toString(2).padStart(8, '0');
+  const syl2bin = (idx: number) => {
+    return idx.toString(2).padStart(8, '0');  //NOTE  base16 isn't any faster
+  }
 
   const addr = syls.reduce(
     (acc, syl, idx) =>
@@ -44,96 +30,49 @@ export function patp2hex(name: string): string {
     ''
   );
 
-  const bn = BigInt('0b'+addr);
-  const hex = ob.fynd(bn).toString(16);
-  return hex.length % 2 !== 0 ? hex.padStart(hex.length + 1, '0') : hex;
+  const num = BigInt('0b' + addr);
+  return ob.fynd(num);
 }
 
 /**
- * Convert a @p-encoded string to a bignum.
- *
- * @param  {String}  name @p
- * @return  {bigint}
+ * Convert a valid `@p` literal string to a bigint.
+ * Returns null on malformed input.
+ * @param  {String}  str  `@p` literal string
  */
-export function patp2bn(name: string): bigint {
-  return BigInt('0x'+patp2hex(name));
+export function parseValidP(str: string): bigint | null {
+  if (!regexP.test(str) || !validSyllables(str)) return null;
+  const res = parseP(str);
+  return (str === renderP(res)) ? res : null;
 }
 
 /**
- * Convert a @p-encoded string to a decimal-encoded string.
- *
- * @param  {String}  name @p
- * @return  {String}
+ * Convert a number to a @p-encoded string.
+ * @param  {bigint}  num
  */
-export function patp2dec(name: string): string {
-  let bn: bigint;
-  try {
-    bn = patp2bn(name);
-  } catch (_) {
-    throw new Error('patp2dec: not a valid @p');
+export function renderP(num: bigint): string {
+  const sxz = ob.fein(num);
+  const dyx = Math.ceil(sxz.toString(16).length / 2);
+  const dyy = Math.ceil(sxz.toString(16).length / 4);
+
+  function loop(tsxz: bigint, timp: number, trep: string): string {
+    const log = tsxz & 0xFFFFn;
+    const pre = prefixes[Number(log >> 8n)];
+    const suf = suffixes[Number(log & 0xFFn)];
+    const etc = (timp & 0b11) ? '-' : ((timp === 0) ? '' : '--');
+
+    const res = pre + suf + etc + trep;
+
+    return timp === dyy ? trep : loop(tsxz >> 16n, timp + 1, res);
   }
-  return bn.toString();
+
+  return (
+    '~' + (dyx <= 1 ? suffixes[Number(sxz)] : loop(sxz, 0, ''))
+  );
 }
 
-/**
- * Determine the ship class of a @p value.
- *
- * @param  {String}  @p
- * @return  {String}
- */
-export function clan(who: string): string {
-  let name: bigint;
-  try {
-    name = patp2bn(who);
-  } catch (_) {
-    throw new Error('clan: not a valid @p');
-  }
-
-  const wid = met(3n, name);
-  return wid <= 1n
-    ? 'galaxy'
-    : wid === 2n
-    ? 'star'
-    : wid <= 4n
-    ? 'planet'
-    : wid <= 8n
-    ? 'moon'
-    : 'comet';
-}
-
-/**
- * Determine the parent of a @p value.
- *
- * @param  {String}  @p
- * @return  {String}
- */
-export function sein(name: string): string {
-  let who: bigint;
-  try {
-    who = patp2bn(name);
-  } catch (_) {
-    throw new Error('sein: not a valid @p');
-  }
-
-  let mir: string;
-  try {
-    mir = clan(name);
-  } catch (_) {
-    throw new Error('sein: not a valid @p');
-  }
-
-  const res =
-    mir === 'galaxy'
-      ? who
-      : mir === 'star'
-      ? end(3n, 1n, who)
-      : mir === 'planet'
-      ? end(4n, 1n, who)
-      : mir === 'moon'
-      ? end(5n, 1n, who)
-      : 0n;
-  return patp(res);
-}
+//
+//  utilities
+//
 
 /**
  * Validate a @p string.
@@ -141,97 +80,170 @@ export function sein(name: string): string {
  * @param  {String}  str a string
  * @return  {boolean}
  */
-export function isValidPatp(str: string): boolean {
-  return isValidPat(str) && str === patp(patp2dec(str));
+export function isValidP(str: string): boolean {
+  return regexP.test(str)               //  general structure
+      && validSyllables(str)            //  valid syllables
+      && str === renderP(parseP(str));  //  no leading zeroes
 }
 
 /**
- * Convert a number to a @p-encoded string.
- *
- * @param  {String, Number, bigint}  arg
- * @return  {String}
+ * Determine the `$rank` of a `@p` value or literal.
+ * Throws on malformed input string.
+ * @param   {String}  who  `@p` value or literal string
  */
-export function patp(arg: string | number | bigint) {
-  if (arg === null) {
-    throw new Error('patp: null input');
-  }
-  const n = BigInt(arg);
+export function clan(who: bigint | string): rank {
+  let num: bigint;
+  if (typeof who === 'bigint') num = who;
+  else num = checkedParseP(who);
 
-  const sxz = ob.fein(n);
-  const dyy = met(4n, sxz);
-
-  function loop(tsxz: bigint, timp: bigint, trep: string): string {
-    const log = end(4n, 1n, tsxz);
-    const pre = prefixes[Number(rsh(3n, 1n, log))];
-    const suf = suffixes[Number(end(3n, 1n, log))];
-    const etc = (timp % 4n) === 0n ? ((timp === 0n) ? '' : '--') : '-';
-
-    const res = pre + suf + etc + trep;
-
-    return timp === dyy ? trep : loop(BigInt(rsh(4n, 1n, tsxz).toString()), timp + 1n, res);
-  }
-
-  const dyx = BigInt(met(3n, sxz).toString());
-
-  return (
-    '~' + (dyx <= 1n ? suffixes[Number(sxz)] : loop(BigInt(sxz.toString()), 0n, ''))
-  );
+  return num <= 0xFFn
+    ? 'czar'
+    : num <= 0xFFFFn
+    ? 'king'
+    : num <= 0xFFFFFFFFn
+    ? 'duke'
+    : num <= 0xFFFFFFFFFFFFFFFFn
+    ? 'earl'
+    : 'pawn';
 }
 
 /**
- * Ensure @p is sigged.
- *
- * @param  {String}  str a string
- * @return  {String}
+ * Determine the "size" of a `@p` value or literal.
+ * Throws on malformed input string.
+ * @param   {String}  who  `@p` value or literal string
  */
-export function preSig(ship: string): string {
-  if (!ship) {
-    return '';
-  }
+export function kind(who: bigint | string): size {
+  return rankToSize(clan(who));
+}
 
-  if (ship.trim().startsWith('~')) {
-    return ship.trim();
+export function rankToSize(rank: rank): size {
+  switch (rank) {
+    case 'czar': return 'galaxy';
+    case 'king': return 'star';
+    case 'duke': return 'planet';
+    case 'earl': return 'moon';
+    case 'pawn': return 'comet';
   }
-
-  return '~'.concat(ship.trim());
+}
+export function sizeToRank(size: size): rank {
+  switch (size) {
+    case 'galaxy': return 'czar';
+    case 'star':   return 'king';
+    case 'planet': return 'duke';
+    case 'moon':   return 'earl';
+    case 'comet':  return 'pawn';
+  }
 }
 
 /**
- * Remove sig from @p
- *
- * @param  {String}  str a string
- * @return  {String}
+ * Determine the parent of a `@p` value.
+ * Throws on malformed input string.
+ * @param  {String | number}  who  `@p` value or literal string
  */
-export function deSig(ship: string): string {
-  if (!ship) {
-    return '';
-  }
+export function sein(who: bigint): bigint;
+export function sein(who: string): string;
+export function sein(who: bigint | string): typeof who {
+  let num: bigint;
+  if (typeof who === 'bigint') num = who;
+  else num = checkedParseP(who);
 
-  return ship.replace('~', '');
+  let mir = clan(num);
+
+  const res =
+    mir === 'czar'
+      ? num
+      : mir === 'king'
+      ? num & 0xFFn
+      : mir === 'duke'
+      ? num & 0xFFFFn
+      : mir === 'earl'
+      ? num & 0xFFFFFFFFn
+      : num & 0xFFFFn;
+
+  if (typeof who === 'bigint') return res;
+  else return renderP(res);
 }
 
 /**
- * Trim @p to short form
- *
- * @param  {String}  str a string
- * @return  {String}
+ * Render short-form ship name.
+ * Throws on malformed input string.
+ * @param  {String | number}  who  `@p` value or literal string
  */
-export function cite(ship: string): string | null {
-  if (!ship) {
-    return null;
+export function cite(who: bigint | string): string {
+  let num: bigint;
+  if (typeof who === 'bigint') num = who;
+  else num = checkedParseP(who);
+
+  if (num <= 0xFFFFFFFFn) {
+    return renderP(num);
+  } else if (num <= 0xFFFFFFFFFFFFFFFFn) {
+    return renderP(num & 0xFFFFFFFFn).replace('-', '^');
+  } else {
+    return renderP(BigInt('0x'+num.toString(16).slice(0,4))) + '_' + renderP(num & 0xFFFFn).slice(1);
   }
+}
 
-  const patp = deSig(ship);
+//
+//  internals
+//
 
-  // comet
-  if (patp.length === 56) {
-    return preSig(patp.slice(0, 6) + '_' + patp.slice(50, 56));
-  }
+function checkedParseP(str: string): bigint {
+  if (!isValidP(str)) throw new Error('invalid @p literal: ' + str);
+  return parseP(str);
+}
 
-  // moon
-  if (patp.length === 27) {
-    return preSig(patp.slice(14, 20) + '^' + patp.slice(21, 27));
-  }
+const pre = `
+dozmarbinwansamlitsighidfidlissogdirwacsabwissib\
+rigsoldopmodfoglidhopdardorlorhodfolrintogsilmir\
+holpaslacrovlivdalsatlibtabhanticpidtorbolfosdot\
+losdilforpilramtirwintadbicdifrocwidbisdasmidlop\
+rilnardapmolsanlocnovsitnidtipsicropwitnatpanmin\
+ritpodmottamtolsavposnapnopsomfinfonbanmorworsip\
+ronnorbotwicsocwatdolmagpicdavbidbaltimtasmallig\
+sivtagpadsaldivdactansidfabtarmonranniswolmispal\
+lasdismaprabtobrollatlonnodnavfignomnibpagsopral\
+bilhaddocridmocpacravripfaltodtiltinhapmicfanpat\
+taclabmogsimsonpinlomrictapfirhasbosbatpochactid\
+havsaplindibhosdabbitbarracparloddosbortochilmac\
+tomdigfilfasmithobharmighinradmashalraglagfadtop\
+mophabnilnosmilfopfamdatnoldinhatnacrisfotribhoc\
+nimlarfitwalrapsarnalmoslandondanladdovrivbacpol\
+laptalpitnambonrostonfodponsovnocsorlavmatmipfip\
+`;
 
-  return preSig(patp);
+const suf = `
+zodnecbudwessevpersutletfulpensytdurwepserwylsun\
+rypsyxdyrnuphebpeglupdepdysputlughecryttyvsydnex\
+lunmeplutseppesdelsulpedtemledtulmetwenbynhexfeb\
+pyldulhetmevruttylwydtepbesdexsefwycburderneppur\
+rysrebdennutsubpetrulsynregtydsupsemwynrecmegnet\
+secmulnymtevwebsummutnyxrextebfushepbenmuswyxsym\
+selrucdecwexsyrwetdylmynmesdetbetbeltuxtugmyrpel\
+syptermebsetdutdegtexsurfeltudnuxruxrenwytnubmed\
+lytdusnebrumtynseglyxpunresredfunrevrefmectedrus\
+bexlebduxrynnumpyxrygryxfeptyrtustyclegnemfermer\
+tenlusnussyltecmexpubrymtucfyllepdebbermughuttun\
+bylsudpemdevlurdefbusbeprunmelpexdytbyttyplevmyl\
+wedducfurfexnulluclennerlexrupnedlecrydlydfenwel\
+nydhusrelrudneshesfetdesretdunlernyrsebhulryllud\
+remlysfynwerrycsugnysnyllyndyndemluxfedsedbecmun\
+lyrtesmudnytbyrsenwegfyrmurtelreptegpecnelnevfes\
+`;
+
+export const prefixes = pre.match(/.{1,3}/g) as RegExpMatchArray;
+export const suffixes = suf.match(/.{1,3}/g) as RegExpMatchArray;
+
+function patp2syls(name: string): string[] {
+  return name.replace(/[\^~-]/g, '').match(/.{1,3}/g) || [];
+}
+
+//  check if string contains valid syllables
+function validSyllables(name: string): boolean {
+  const syls = patp2syls(name);
+  return !(syls.length % 2 !== 0 && syls.length !== 1)  // wrong length
+      && syls.every((syl, index) =>  //  invalid syllables
+           index % 2 !== 0 || syls.length === 1
+           ? suffixes.includes(syl)
+           : prefixes.includes(syl)
+         );
 }
