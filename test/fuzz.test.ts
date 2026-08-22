@@ -90,8 +90,7 @@ function safeFloat(size: bigint, w: bigint, p: bigint) {
   const makemask = (n: bigint) => full ^ (1n << (p + (n % w)));
   return (n: bigint) => n & makemask(n);
 }
-//TODO  tests fail, off-by-one...
-// fuzz(4,  16, ['rh'], safeFloat( 16n,  5n,  10n));
-// fuzz(4,  32, ['rs'], safeFloat( 32n,  8n,  23n));
-// fuzz(4,  64, ['rd'], safeFloat( 64n, 11n,  52n));
-// fuzz(4, 128, ['rq'], safeFloat(128n, 15n, 112n));
+fuzz(4,  16, ['rh'], safeFloat( 16n,  5n,  10n));
+fuzz(4,  32, ['rs'], safeFloat( 32n,  8n,  23n));
+fuzz(4,  64, ['rd'], safeFloat( 64n, 11n,  52n));
+fuzz(4, 128, ['rq'], safeFloat(128n, 15n, 112n));
