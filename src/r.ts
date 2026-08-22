@@ -248,7 +248,8 @@ function deconstruct(float: bigint, exponentBits: bigint, precisionBits: bigint)
     unequalMargins = false;
   }
 
-  const buf = (2n**precisionBits).toString(10).length + 1;
+  //  include implicit leading bit in precision
+  const buf = (2n**(precisionBits+1n)).toString(10).length + 1;
   const res = dragon4(mantissa, Number(exponent), mantissaHighBitIdx, unequalMargins, 'unique', 0, buf);
   return { t: 'd', s: sign, e: res.outExponent, a: res.digits };
 }
