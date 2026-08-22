@@ -89,57 +89,70 @@ function makeFloat(w: number, p: number, sign: boolean, intPart: string, floatPa
   return construct(p, w, sign, BigInt(intPart), BigInt(floatPart.length), BigInt(floatPart));
 }
 
-//NOTE  modified from an encodeFloat() written by by Jonas Raoni Soares Silva,
-//      made to operate on (big)integers, without using js's float logic.
-//      http://jsfromhell.com/classes/binary-parser
-//      (yes, this code is vaguely deranged. but it works!)
+//  encode IEEE 754 float with round-to-nearest, ties-to-even
 function construct(precisionBits: number, exponentBits: number,
-                   sign: boolean, intPart: bigint, floatDits: bigint, floatPart: bigint) {
-  //REVIEW  when do we trigger this?
-  //        inputs representing nrs too large for exponentBits?
-  //        inputs with precision we can't match?
-  //        add tests for those cases! should match stdlib result.
-  function exceed(x: string) {
-    console.warn(x);
-    return 1;
+  sign: boolean, intPart: bigint, floatDits: bigint, floatPart: bigint) {
+  const bias = 2 ** (exponentBits - 1) - 1;
+  const minExp = 1 - bias;
+  const maxExp = bias;
+  const hiddenBit = 1n << BigInt(precisionBits);
+  const exponentMask = bitMask(BigInt(exponentBits));
+  const denominator = 10n ** floatDits;
+  const numerator = intPart * denominator + floatPart;
+  const signBit = sign ? '0' : '1';
+  const pad = (n: bigint, bits: number) => n.toString(2).padStart(bits, '0');
+  const infinity = () => signBit + pad(exponentMask, exponentBits) + '0'.repeat(precisionBits);
+
+  if (numerator === 0n)
+    return signBit + '0'.repeat(exponentBits + precisionBits);
+
+  // floor(log2(numerator / denominator)) without js numbers/floats
+  let exponent = numerator.toString(2).length - denominator.toString(2).length;
+  if (exponent >= 0
+    ? numerator < (denominator << BigInt(exponent))
+    : (numerator << BigInt(-exponent)) < denominator)
+    exponent--;
+
+  const roundScaled = (shift: number): bigint => {
+    const scaledNumerator = shift >= 0
+      ? numerator << BigInt(shift)
+      : numerator;
+    const scaledDenominator = shift >= 0
+      ? denominator
+      : denominator << BigInt(-shift);
+    const quotient = scaledNumerator / scaledDenominator;
+    const remainder = scaledNumerator % scaledDenominator;
+    const twiceRemainder = remainder << 1n;
+    return twiceRemainder > scaledDenominator
+      || (twiceRemainder === scaledDenominator && (quotient & 1n) === 1n)
+      ? quotient + 1n
+      : quotient;
+  };
+
+  let exponentField: bigint;
+  let mantissa: bigint;
+  if (exponent < minExp) {
+    mantissa = roundScaled(precisionBits - minExp);
+    if (mantissa === 0n)
+      return signBit + '0'.repeat(exponentBits + precisionBits);
+    if (mantissa >= hiddenBit) {
+      exponentField = 1n;
+      mantissa = 0n;
+    } else {
+      exponentField = 0n;
+    }
+  } else {
+    mantissa = roundScaled(precisionBits - exponent);
+    if (mantissa === (hiddenBit << 1n)) {
+      mantissa >>= 1n;
+      exponent++;
+    }
+    if (exponent > maxExp) return infinity();
+    exponentField = BigInt(exponent + bias);
+    mantissa -= hiddenBit;
   }
 
-  const bias = 2**(exponentBits - 1) - 1,
-    minExp = -bias + 1,
-    maxExp = bias,
-    minUnnormExp = minExp - precisionBits,
-    len = 2 * bias + 1 + precisionBits + 3,
-    bin = new Array(len),
-    denom = 10n ** floatDits;
-  var exp = 0,
-    signal = !sign,
-    i, lastBit, rounded, j, result, n;
-  //  zero-initialize the bit-array
-  for (i = len; i; bin[--i] = 0);
-  //  integral into bits
-  for (i = bias + 2; intPart && i; bin[--i] = intPart & 1n, intPart = intPart >> 1n);
-  //  fractional into bits
-  for (i = bias + 1; floatPart > 0n && (i < len); (bin[++i] = (((floatPart *= 2n) >= denom) ? 1 : 0)) && (floatPart = floatPart - denom));
-  //  walk cursor (i) to first 1-bit.
-  for (i = -1; ++i < len && !bin[i];);
-  //  round if needed
-  if (bin[(lastBit = precisionBits - 1 + (i = (exp = bias + 1 - i) >= minExp && exp <= maxExp ? i + 1 : bias + 1 - (exp = minExp - 1))) + 1]) {
-    if (!(rounded = bin[lastBit]))
-      for (j = lastBit + 2; !rounded && j < len; rounded = bin[j++]);
-    for (j = lastBit + 1; rounded && --j >= 0; (bin[j] = (!bin[j] ? 1 : 0) - 0) && (rounded = 0));
-  }
-  //  walk cursor (i) to first/next(??) 1-bit
-  for (i = i - 2 < 0 ? -1 : i - 3; ++i < len && !bin[i];);
-
-  //  set exponent, throwing on under- and overflows
-  (exp = bias + 1 - i) >= minExp && exp <= maxExp ? ++i : exp < minExp &&
-    (exp != bias + 1 - len && exp < minUnnormExp && exceed('r.construct underflow'), i = bias + 1 - (exp = minExp - 1));
-  intPart && (exceed(intPart ? 'r.construct overflow' : 'r.construct'),
-    exp = maxExp + 1, i = bias + 2);
-  //  exponent into bits
-  for (n = Math.abs(exp + bias), j = exponentBits + 1, result = ''; --j; result = (n & 1) + result, n = n >>= 1);
-  //  final serialization: sign + exponent + mantissa
-  return (signal ? '1' : '0') + result + bin.slice(i, i + precisionBits).join('');
+  return signBit + pad(exponentField, exponentBits) + pad(mantissa, precisionBits);
 };
 
 //
